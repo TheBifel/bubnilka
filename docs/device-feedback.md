@@ -17,6 +17,7 @@ Host artifact: `android-app/build/outputs/apk/debug/android-app-debug.apk` (gene
 | Автозавантаження STT-моделі | Після fallback Android отримує запит на `uk-UA` offline-модель | Не перевірено | Система може показати підтвердження або відкласти download |
 | П'ять стилів | Стиль змінює форму, але не факти | Не перевірено | Device-only |
 | Undo / Regenerate | Заміна лише при точному збігу суфікса | Не перевірено | Device-only |
+| Backspace | Видаляє selection або попередній Unicode code point | Не перевірено | Додано після першого UX feedback |
 | Немає мережі / квоти | Є Retry та Insert raw, без циклу retry | Не перевірено | Device-only |
 | Password / PIN | Мікрофон і cloud-виклик недоступні | Не перевірено | Device-only |
 | Зміна клавіатури | Системний picker відкривається | Не перевірено | Device-only |
@@ -24,6 +25,7 @@ Host artifact: `android-app/build/outputs/apk/debug/android-app-debug.apk` (gene
 ## Метрики першого проходу
 
 - Час від завершення мовлення до вставки: —
+- Firebase `gemini_generate` cold/warm timings: очікують вимірювання новою збіркою
 - Помилки локального STT: `isOnDeviceRecognitionAvailable=false`; реалізовано системний fallback
 - Несумісні застосунки або поля: —
 - Побажання до розміру клавіш/панелі: —

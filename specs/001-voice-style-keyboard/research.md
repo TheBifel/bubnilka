@@ -89,6 +89,21 @@
   flight. Exact suffix matching prevents deleting unrelated user content.
 - **Alternatives considered**: Blind `deleteSurroundingText()` was rejected as destructive.
 
+## Cloud latency diagnostics
+
+- **Decision**: Record elapsed time around the Firebase `generateContent()` call as a content-free
+  `gemini_generate` timing. Do not log prompt/output size or text. Collect first-call and warm-call
+  samples before changing the model path.
+- **Rationale**: The current flow invokes Firebase immediately after final STT and has no local
+  queue or artificial delay. A single end-to-end timing distinguishes the cloud boundary from UI
+  and STT, while repeated samples reveal App Check/TLS cold-start effects.
+- **Next candidates after measurement**: stream partial model output for perceived latency, A/B the
+  allowlisted Flash-Lite models, cap output tokens, and prefetch App Check only if the first request
+  is uniquely slow.
+- **Sources**: [Firebase streaming](https://firebase.google.com/docs/ai-logic/generate-text),
+  [Firebase latency troubleshooting](https://firebase.google.com/docs/ai-logic/faq-and-troubleshooting),
+  [thinking configuration](https://firebase.google.com/docs/ai-logic/thinking).
+
 ## Free-tier privacy and diagnostics
 
 - **Decision**: Onboarding discloses cloud processing and free-tier data terms. Do not enable

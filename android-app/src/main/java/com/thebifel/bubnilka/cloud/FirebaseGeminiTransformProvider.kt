@@ -1,5 +1,6 @@
 package com.thebifel.bubnilka.cloud
 
+import android.os.SystemClock
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.ai.GenerativeModel
@@ -12,12 +13,15 @@ import com.thebifel.bubnilka.core.port.CloudTransformException
 import com.thebifel.bubnilka.core.port.CloudTransformProvider
 import com.thebifel.bubnilka.core.prompt.PromptBuilder
 import com.thebifel.bubnilka.runtime.AndroidFailureMapper
+import com.thebifel.bubnilka.runtime.BubnilkaLog
 import kotlinx.coroutines.CancellationException
 
 class FirebaseGeminiTransformProvider(
     private val model: GenerativeModel,
 ) : CloudTransformProvider {
     override suspend fun transform(request: TransformationRequest): TransformationResult {
+        val startedAt = SystemClock.elapsedRealtime()
+        BubnilkaLog.state("gemini_generate_started")
         try {
             val response = model.generateContent(PromptBuilder.build(request))
             val text = response.text ?: throw CloudTransformException(KeyboardFailure.INVALID_CLOUD_RESPONSE)
@@ -32,6 +36,11 @@ class FirebaseGeminiTransformProvider(
             throw known
         } catch (failure: Throwable) {
             throw CloudTransformException(AndroidFailureMapper.mapCloud(failure), failure)
+        } finally {
+            BubnilkaLog.timing(
+                category = "gemini_generate",
+                durationMillis = SystemClock.elapsedRealtime() - startedAt,
+            )
         }
     }
 

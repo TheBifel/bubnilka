@@ -42,7 +42,15 @@ allowlist and specification before changing the local model value.
 6. Repeat with another style, then exercise Undo and Regenerate.
 7. Disable networking, dictate again, and verify Retry plus Insert raw are offered.
 8. Focus a password field and verify voice/cloud controls are unavailable.
-9. Record observed latency, recognition accuracy, and app-specific limitations in the project
+9. Tap Backspace after insertion and verify it removes the selection or previous character without
+   opening another keyboard.
+10. Capture three cloud timings (first call and two warm calls) without transcript content:
+
+    ```sh
+    adb logcat -s Bubnilka | grep 'timing=gemini_generate'
+    ```
+
+11. Record observed latency, recognition accuracy, and app-specific limitations in the project
    feedback notes before claiming device verification.
 
 If Ukrainian on-device recognition is missing, the first dictation should use the system recognizer.

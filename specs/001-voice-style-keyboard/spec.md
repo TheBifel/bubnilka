@@ -155,6 +155,10 @@ and secure fields without examining implementation details.
 - **FR-017**: Only one recording or transformation session may be active; starting a new session
   MUST cancel or supersede stale work so stale results cannot be inserted.
 - **FR-018**: The product MUST provide a visible way to switch to another enabled keyboard.
+- **FR-019**: The keyboard MUST provide an always-available Backspace control that deletes the
+  current selection or one Unicode code point before the cursor through the active input connection.
+- **FR-020**: Cloud transformation diagnostics MUST record request duration and failure category
+  without recording prompts, transcripts, generated output, or other user content.
 
 ### Key Entities
 

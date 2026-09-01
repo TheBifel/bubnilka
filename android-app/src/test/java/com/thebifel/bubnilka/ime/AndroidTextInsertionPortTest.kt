@@ -34,9 +34,20 @@ class AndroidTextInsertionPortTest {
         assertEquals(0, connection.deleteCalls)
     }
 
+    @Test
+    fun backspaceDeletesOneEditorUnit() {
+        val connection = FakeCursorConnection("готовий текст")
+        val port = AndroidTextInsertionPort { connection }
+
+        assertTrue(port.backspace())
+        assertEquals("готовий текс", connection.content)
+        assertEquals(1, connection.backspaceCalls)
+    }
+
     private class FakeCursorConnection(initialContent: String) : CursorConnection {
         var content: String = initialContent
         var deleteCalls: Int = 0
+        var backspaceCalls: Int = 0
 
         override fun textBeforeCursor(maxCharacters: Int): CharSequence = content.takeLast(maxCharacters)
 
@@ -48,6 +59,12 @@ class AndroidTextInsertionPortTest {
         override fun deleteBeforeCursor(characters: Int): Boolean {
             deleteCalls += 1
             content = content.dropLast(characters)
+            return true
+        }
+
+        override fun backspace(): Boolean {
+            backspaceCalls += 1
+            content = content.dropLast(1)
             return true
         }
     }

@@ -7,6 +7,7 @@ interface CursorConnection {
     fun textBeforeCursor(maxCharacters: Int): CharSequence?
     fun commit(text: String): Boolean
     fun deleteBeforeCursor(characters: Int): Boolean
+    fun backspace(): Boolean
 }
 
 class FrameworkCursorConnection(
@@ -19,11 +20,22 @@ class FrameworkCursorConnection(
 
     override fun deleteBeforeCursor(characters: Int): Boolean =
         connection.deleteSurroundingText(characters, 0)
+
+    override fun backspace(): Boolean {
+        val selectedText = connection.getSelectedText(0)
+        return if (selectedText.isNullOrEmpty()) {
+            connection.deleteSurroundingTextInCodePoints(1, 0)
+        } else {
+            connection.commitText("", 1)
+        }
+    }
 }
 
 class AndroidTextInsertionPort(
     private val connectionProvider: () -> CursorConnection?,
 ) : TextInsertionPort {
+    fun backspace(): Boolean = connectionProvider()?.backspace() == true
+
     override fun insert(text: String): Boolean {
         val normalized = text.trim()
         if (normalized.isEmpty()) return false

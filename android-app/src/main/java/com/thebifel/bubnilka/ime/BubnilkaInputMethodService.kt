@@ -81,6 +81,9 @@ class BubnilkaInputMethodService : InputMethodService() {
                 getSystemService(InputMethodManager::class.java).showInputMethodPicker()
             }
         }
+        view.findViewById<Button>(R.id.backspace_button).setOnClickListener {
+            insertion.backspace()
+        }
         applyEditorPolicy(currentInputEditorInfo)
         render(session.state)
         BubnilkaLog.state("keyboard_view_created")

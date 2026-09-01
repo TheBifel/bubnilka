@@ -199,6 +199,19 @@ field and confirm no voice or cloud action can begin.
 
 ---
 
+## Phase 9: Device Feedback - Editing, Latency, and Visual Validation
+
+- [X] T045 Add a host test and an always-visible Backspace control using the active
+  `InputConnection`.
+- [X] T046 Add content-free Gemini request timing and a device command for collecting cold/warm
+  latency samples.
+- [X] T047 Inspect Proxmox/LXC emulator prerequisites and document the KVM-enabled headless test
+  path in `docs/emulator-capability.md`.
+- [X] T048 Run the complete verification gate and publish the new APK with device-safe latency
+  instrumentation; device samples remain the input to the next optimization decision.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
