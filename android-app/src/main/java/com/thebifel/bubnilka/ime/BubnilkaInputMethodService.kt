@@ -17,14 +17,14 @@ import com.thebifel.bubnilka.core.session.KeyboardSession
 import com.thebifel.bubnilka.core.session.VoiceFlow
 import com.thebifel.bubnilka.runtime.BubnilkaLog
 import com.thebifel.bubnilka.runtime.CoroutineOwner
-import com.thebifel.bubnilka.speech.AndroidOnDeviceSpeechToTextProvider
+import com.thebifel.bubnilka.speech.AndroidSpeechToTextProvider
 import com.thebifel.bubnilka.storage.ConsentRepository
 
 class BubnilkaInputMethodService : InputMethodService() {
     private val coroutineOwner = CoroutineOwner()
     private var session = KeyboardSession()
     private var voiceFlow: VoiceFlow? = null
-    private var speechProvider: AndroidOnDeviceSpeechToTextProvider? = null
+    private var speechProvider: AndroidSpeechToTextProvider? = null
     private var keyboardView: View? = null
     private val consentRepository: ConsentRepository by lazy { ConsentRepository.from(this) }
     private var cloudConsentAccepted: Boolean = false
@@ -34,7 +34,7 @@ class BubnilkaInputMethodService : InputMethodService() {
         val view = layoutInflater.inflate(R.layout.keyboard_view, null)
         keyboardView = view
         cloudConsentAccepted = consentRepository.isAccepted()
-        val speech = AndroidOnDeviceSpeechToTextProvider(this)
+        val speech = AndroidSpeechToTextProvider(this)
         speechProvider = speech
         val insertion = AndroidTextInsertionPort {
             currentInputConnection?.let(::FrameworkCursorConnection)
@@ -214,7 +214,7 @@ class BubnilkaInputMethodService : InputMethodService() {
     }
 
     private fun failureMessage(failure: KeyboardFailure): Int = when (failure) {
-        KeyboardFailure.UNSUPPORTED_ON_DEVICE_RECOGNITION -> R.string.error_on_device_unavailable
+        KeyboardFailure.SPEECH_RECOGNITION_UNAVAILABLE -> R.string.error_speech_unavailable
         KeyboardFailure.PERMISSION_DENIED -> R.string.error_microphone_permission
         KeyboardFailure.NO_SPEECH -> R.string.error_no_speech
         KeyboardFailure.CLOUD_NOT_CONFIGURED -> R.string.error_cloud_not_configured

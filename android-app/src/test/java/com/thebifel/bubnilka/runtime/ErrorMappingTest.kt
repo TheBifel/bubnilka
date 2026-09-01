@@ -2,7 +2,7 @@ package com.thebifel.bubnilka.runtime
 
 import android.speech.SpeechRecognizer
 import com.thebifel.bubnilka.core.model.KeyboardFailure
-import com.thebifel.bubnilka.speech.AndroidOnDeviceSpeechToTextProvider
+import com.thebifel.bubnilka.speech.AndroidSpeechToTextProvider
 import java.io.IOException
 import java.util.concurrent.CancellationException
 import org.junit.Assert.assertEquals
@@ -13,15 +13,19 @@ class ErrorMappingTest {
     fun mapsAndroidSpeechErrorsToStableCategories() {
         assertEquals(
             KeyboardFailure.PERMISSION_DENIED,
-            AndroidOnDeviceSpeechToTextProvider.mapRecognitionError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS),
+            AndroidSpeechToTextProvider.mapRecognitionError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS),
         )
         assertEquals(
             KeyboardFailure.NO_SPEECH,
-            AndroidOnDeviceSpeechToTextProvider.mapRecognitionError(SpeechRecognizer.ERROR_NO_MATCH),
+            AndroidSpeechToTextProvider.mapRecognitionError(SpeechRecognizer.ERROR_NO_MATCH),
         )
         assertEquals(
-            KeyboardFailure.UNSUPPORTED_ON_DEVICE_RECOGNITION,
-            AndroidOnDeviceSpeechToTextProvider.mapRecognitionError(SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE),
+            KeyboardFailure.SPEECH_RECOGNITION_UNAVAILABLE,
+            AndroidSpeechToTextProvider.mapRecognitionError(SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE),
+        )
+        assertEquals(
+            true,
+            AndroidSpeechToTextProvider.shouldFallbackToSystem(SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE),
         )
     }
 

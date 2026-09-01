@@ -7,10 +7,11 @@
 **Status**: Ready for planning
 
 **Input**: User description: "Build the Android MVP of Bubnilka: a voice-first keyboard that
-transcribes speech locally, transforms the transcript in a selected cloud style, and inserts the
-result into the active text field. Keep the product future-ready for shared mobile logic, but do
-not build or compile iOS. The installed app must not depend on the development server and must stay
-within a no-payment cloud tier."
+prefers local speech transcription with an automatic system/cloud fallback, transforms the
+transcript in a selected cloud style, and inserts the result into the active text field. Ask the
+system recognizer to download an offline model for future sessions. Keep the product future-ready
+for shared mobile logic, but do not build or compile iOS. The installed app must not depend on the
+development server and must stay within a no-payment cloud tier."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -74,8 +75,8 @@ raw transcript when one exists, or return to idle without restarting the keyboar
 **Acceptance Scenarios**:
 
 1. **Given** the device lacks compatible on-device recognition, **When** the user taps the
-   microphone, **Then** the keyboard explains that a local speech model is required and does not
-   silently use cloud speech recognition.
+   microphone, **Then** the keyboard uses the disclosed system recognizer fallback and requests an
+   offline Ukrainian model for later sessions without blocking the current dictation.
 2. **Given** a final raw transcript exists but cloud transformation fails, **When** the error is
    shown, **Then** the user can retry or insert the raw transcript.
 3. **Given** the cloud quota is exhausted, **When** transformation fails, **Then** the keyboard
@@ -95,9 +96,10 @@ and secure fields without examining implementation details.
 
 **Acceptance Scenarios**:
 
-1. **Given** cloud consent has not been granted, **When** the user first attempts transformation,
-   **Then** the app explains that the dictated transcript is sent to a cloud model and requires an
-   affirmative choice before proceeding.
+1. **Given** current disclosure consent has not been granted, **When** the user first attempts
+   dictation, **Then** the app explains that fallback speech recognition may send audio through the
+   system provider and that the final transcript is sent to Gemini, then requires an affirmative
+   choice before proceeding.
 2. **Given** a password or other secure field is focused, **When** Bubnilka becomes active,
    **Then** microphone and cloud actions are disabled and no dictated content is captured.
 
@@ -121,8 +123,9 @@ and secure fields without examining implementation details.
   a system keyboard.
 - **FR-002**: The keyboard MUST expose microphone, style selection, status, and keyboard-switch
   controls in every supported non-sensitive text field.
-- **FR-003**: The keyboard MUST use only an on-device speech recognizer and MUST report local model
-  unavailability instead of silently using network recognition.
+- **FR-003**: The keyboard MUST prefer the explicit on-device recognizer, MUST automatically fall
+  back to the system recognizer when the local service or language is unavailable, and MUST request
+  offline-model download for later sessions on supported Android versions.
 - **FR-004**: Partial and final raw transcripts MUST remain inside the keyboard until the user
   inserts raw text or a successful transformation is ready.
 - **FR-005**: The keyboard MUST provide Structured, Concise, Formal, Friendly, and Viking styles,
@@ -139,8 +142,9 @@ and secure fields without examining implementation details.
   Retry and Insert raw actions.
 - **FR-011**: The keyboard MUST distinguish recognition, connectivity, quota, invalid-response,
   cancellation, and unsupported-device failures in user-facing states.
-- **FR-012**: The product MUST require explicit cloud-processing consent before its first cloud
-  request and MUST make the consent revocable in settings.
+- **FR-012**: The product MUST disclose both possible system/cloud audio recognition and Gemini
+  transcript processing, require versioned consent before voice capture, and make consent revocable
+  in settings.
 - **FR-013**: Voice capture and cloud transformation MUST be disabled for secure input fields.
 - **FR-014**: The product MUST NOT persist audio or transcript content and MUST NOT include content
   in diagnostic logs.
@@ -171,7 +175,7 @@ and secure fields without examining implementation details.
 - **SC-001**: On the target phone, the user can go from tapping the microphone to seeing a styled
   message in a regular text field in one uninterrupted flow, without copy/paste.
 - **SC-002**: For a typical message of up to 500 characters, the transformed text appears within
-  10 seconds after local recognition completes under a working network connection in at least 9 of
+  10 seconds after speech recognition completes under a working network connection in at least 9 of
   10 manual trials.
 - **SC-003**: In a fixed set of 20 Ukrainian test transcripts, every result retains all names,
   numbers, and links, preserves the source language, and contains no assistant preamble.
@@ -188,12 +192,12 @@ and secure fields without examining implementation details.
 
 - The first tester uses a Samsung Galaxy S21 running Android 15 with internet access for cloud
   transformation.
-- The user is willing to install the required local Ukrainian speech model if the device reports it
-  missing.
+- Android's configured speech service supports Ukrainian online or offline; model download may be
+  scheduled or require system-provided confirmation.
 - The free cloud tier is capacity-limited and may temporarily reject requests; temporary
   unavailability is acceptable if the raw transcript is preserved.
 - The free cloud tier may process submitted text under provider data-improvement terms, and the MVP
   user explicitly accepts this during onboarding.
 - The MVP is distributed privately as a debug APK and is not submitted to an app store.
-- Full letter layouts, autocorrection, suggestions, cloud speech recognition, accounts, iOS,
-  analytics, and local language models are outside this feature.
+- Full letter layouts, autocorrection, suggestions, accounts, iOS, analytics, and bundled language
+  models are outside this feature.

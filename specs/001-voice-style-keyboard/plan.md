@@ -6,12 +6,13 @@
 
 ## Summary
 
-Deliver an Android 12+ voice-first input method that keeps speech recognition on-device, sends only
-the final transcript to the free Gemini Developer API through Firebase AI Logic, and automatically
-commits the styled result to the focused field. A Kotlin Multiplatform shared module owns styles,
-prompt construction, state transitions, validation, and provider contracts. Android-only adapters
-own speech recognition, Firebase, preferences, and `InputConnection`. No iOS target or runtime
-backend is built in the MVP.
+Deliver an Android 12+ voice-first input method that prefers on-device speech recognition, falls
+back to Android's system recognizer when the local service or language is missing, requests an
+offline model for later use, sends the final transcript to the free Gemini Developer API through
+Firebase AI Logic, and automatically commits the styled result to the focused field. A Kotlin
+Multiplatform shared module owns styles, prompt construction, state transitions, validation, and
+provider contracts. Android-only adapters own speech recognition, Firebase, preferences, and
+`InputConnection`. No iOS target or runtime backend is built in the MVP.
 
 ## Technical Context
 
@@ -34,8 +35,9 @@ contract tests, manual Samsung Galaxy S21 smoke test
 **Performance Goals**: No partial insertion; visible state update within 200 ms of local callbacks;
 cloud result committed within 10 seconds after recognition in 9/10 normal-network trials
 
-**Constraints**: No payment method; no server/proxy; no cloud STT; no content logging; no iOS build;
-no full alphabet layout; clean build must not require private credentials
+**Constraints**: No payment method; no server/proxy; system cloud STT only as a disclosed fallback;
+no content logging; no iOS build; no full alphabet layout; clean build must not require private
+credentials
 
 **Scale/Scope**: One private tester, five style presets, one active session, messages up to 2,000
 characters with an MVP UX optimized for typical messages up to 500 characters
@@ -44,8 +46,9 @@ characters with an MVP UX optimized for typical messages up to 500 characters
 
 *GATE: Passed before research and re-checked after design.*
 
-- **Privacy by Construction**: PASS. Only session transcripts cross the cloud boundary; content is
-  memory-only and secure fields are blocked.
+- **Privacy by Construction**: PASS. System-recognizer fallback may send audio only after versioned
+  disclosure consent; application content remains memory-only, content-free logs are enforced, and
+  secure fields are blocked.
 - **Shared Core, Native Edges**: PASS. Shared state and contracts contain no Android or Firebase
   types; all platform APIs are adapters.
 - **Verifiable Changes**: PASS. Deterministic state/prompt behavior has host tests; build/lint/unit

@@ -24,7 +24,7 @@ class VoiceFlow(
     fun start(languageTag: String = "uk-UA"): Long {
         val sessionId = session.startListening()
         if (!speech.isAvailable) {
-            session.fail(sessionId, KeyboardFailure.UNSUPPORTED_ON_DEVICE_RECOGNITION)
+            session.fail(sessionId, KeyboardFailure.SPEECH_RECOGNITION_UNAVAILABLE)
             notifyState()
             return sessionId
         }

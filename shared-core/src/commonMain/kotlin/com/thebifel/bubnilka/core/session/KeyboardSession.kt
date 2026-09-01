@@ -193,7 +193,7 @@ class KeyboardSession(initialStyle: StylePreset = StylePreset.default) {
         rawTranscript: String?,
     ): Set<RecoveryAction> = buildSet {
         if (failure != KeyboardFailure.PERMISSION_DENIED &&
-            failure != KeyboardFailure.UNSUPPORTED_ON_DEVICE_RECOGNITION &&
+            failure != KeyboardFailure.SPEECH_RECOGNITION_UNAVAILABLE &&
             failure != KeyboardFailure.CLOUD_NOT_CONFIGURED &&
             failure != KeyboardFailure.UNSUPPORTED_MODEL
         ) {

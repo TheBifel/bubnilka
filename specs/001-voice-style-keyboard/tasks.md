@@ -74,8 +74,8 @@ regular field, and observe only the final transformed text inserted at the curso
 
 - [X] T016 [US1] Implement invariant prompt construction in
   `shared-core/src/commonMain/kotlin/com/thebifel/bubnilka/core/prompt/PromptBuilder.kt`
-- [X] T017 [US1] Implement on-device Android speech adapter in
-  `android-app/src/main/java/com/thebifel/bubnilka/speech/AndroidOnDeviceSpeechToTextProvider.kt`
+- [X] T017 [US1] Implement local-first Android speech adapter in
+  `android-app/src/main/java/com/thebifel/bubnilka/speech/AndroidSpeechToTextProvider.kt`
 - [X] T018 [US1] Implement local Firebase property loading and runtime initialization in
   `android-app/src/main/java/com/thebifel/bubnilka/cloud/FirebaseConfiguration.kt`
 - [X] T019 [US1] Implement Firebase AI Logic/App Check provider and credential-free fallback in
@@ -181,6 +181,21 @@ field and confirm no voice or cloud action can begin.
   `docs/verification.md`
 - [X] T040 Review `specs/001-voice-style-keyboard/quickstart.md`, package the debug APK, and record
   remaining device-only checks in `docs/device-feedback.md`
+
+---
+
+## Phase 8: Device Feedback - Speech Fallback
+
+**Purpose**: Remove the missing-offline-model blocker discovered on the first physical device.
+
+- [X] T041 Add host tests for local-first mode selection and system fallback in
+  `android-app/src/test/java/com/thebifel/bubnilka/speech/SpeechRecognitionModeTest.kt`
+- [X] T042 Replace the strict local adapter with local-first/system fallback and automatic `uk-UA`
+  model download in `android-app/src/main/java/com/thebifel/bubnilka/speech/`
+- [X] T043 Update disclosure versioning, user-facing copy, specification, contract, research, and
+  quickstart for the expanded audio-processing boundary
+- [X] T044 Run the complete verification gate, publish the configured APK, and record artifact
+  evidence in `docs/verification.md`
 
 ---
 

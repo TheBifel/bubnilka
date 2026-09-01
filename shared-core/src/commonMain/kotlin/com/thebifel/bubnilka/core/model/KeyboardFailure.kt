@@ -1,7 +1,7 @@
 package com.thebifel.bubnilka.core.model
 
 enum class KeyboardFailure {
-    UNSUPPORTED_ON_DEVICE_RECOGNITION,
+    SPEECH_RECOGNITION_UNAVAILABLE,
     PERMISSION_DENIED,
     NO_SPEECH,
     RECOGNITION_ERROR,

@@ -34,17 +34,24 @@
 - **Alternatives considered**: Compose inside the IME was rejected for the first slice because it
   adds view-tree/lifecycle setup and memory overhead without improving the core validation.
 
-## Local speech recognition
+## Local-first speech recognition with system fallback
 
-- **Decision**: Use `SpeechRecognizer.isOnDeviceRecognitionAvailable()` and
-  `createOnDeviceSpeechRecognizer()` only. Set Ukrainian as the initial language and expose clear
-  unsupported/model-missing states. Destroy the recognizer with the IME lifecycle and reject stale
-  callbacks using a session identifier.
-- **Rationale**: The generic recognizer may use remote servers. The explicit on-device factory is
-  the only path matching the constitution.
-- **Alternatives considered**: Generic system speech recognition and bundled Whisper were rejected
-  respectively for privacy ambiguity and MVP size/benchmark uncertainty.
-- **Source**: [Android SpeechRecognizer](https://developer.android.com/reference/android/speech/SpeechRecognizer.html).
+- **Decision**: Prefer `SpeechRecognizer.createOnDeviceSpeechRecognizer()`. If the on-device
+  service is missing or rejects Ukrainian as unavailable, continue the same session with
+  `createSpeechRecognizer()` and `EXTRA_PREFER_OFFLINE=false`. After a system-recognizer session,
+  call `triggerModelDownload()` with `uk-UA` and offline preference so later sessions can migrate
+  back to local recognition. Destroy recognizers with the IME lifecycle and reject stale callbacks
+  with session and attempt identifiers.
+- **Rationale**: Device testing showed the strict on-device prerequisite blocked the complete MVP.
+  Android's default recognizer supplies the requested cloud-capable fallback, while the download
+  request improves later offline availability without delaying the current dictation.
+- **Privacy impact**: The system recognizer may send audio to its provider, so disclosure version 2
+  explicitly covers audio fallback and forces renewed consent before voice capture.
+- **Alternatives considered**: Requiring manual model installation was rejected because it blocks
+  first use. Bundled Whisper remains outside the MVP due to package size and device benchmarking
+  work.
+- **Sources**: [Android SpeechRecognizer](https://developer.android.com/reference/android/speech/SpeechRecognizer.html),
+  [RecognizerIntent](https://developer.android.com/reference/android/speech/RecognizerIntent).
 
 ## Cloud transformation and authorization
 

@@ -4,7 +4,8 @@
 
 - JDK 17
 - Android SDK platform 36 and build tools 36.0.0
-- Android 12+ device with an installed Ukrainian on-device speech model
+- Android 12+ device with an enabled system speech-recognition service; an installed Ukrainian
+  offline model is preferred but no longer required for the first run
 - Optional Firebase Spark project configured for Firebase AI Logic, Gemini Developer API, and App
   Check debug provider
 
@@ -32,7 +33,8 @@ allowlist and specification before changing the local model value.
 ## Device smoke test
 
 1. Install `android-app/build/outputs/apk/debug/android-app-debug.apk`.
-2. Open Bubnilka and accept the cloud-processing disclosure.
+2. Open Bubnilka and accept disclosure version 2 covering system-recognizer audio fallback and
+   Gemini transcript processing. An earlier acceptance is intentionally invalidated.
 3. Use the provided system buttons to enable and select Bubnilka.
 4. Focus a normal text field in Notes, Telegram, a browser, Gmail, and one additional app.
 5. Select Structured, dictate a Ukrainian sentence, and verify only the final styled result is
@@ -42,3 +44,7 @@ allowlist and specification before changing the local model value.
 8. Focus a password field and verify voice/cloud controls are unavailable.
 9. Record observed latency, recognition accuracy, and app-specific limitations in the project
    feedback notes before claiming device verification.
+
+If Ukrainian on-device recognition is missing, the first dictation should use the system recognizer.
+After that session Android receives an automatic `uk-UA` offline-model download request; the system
+may show confirmation or schedule the download according to the configured recognition service.

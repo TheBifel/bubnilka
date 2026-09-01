@@ -13,7 +13,8 @@ Host artifact: `android-app/build/outputs/apk/debug/android-app-debug.apk` (gene
 |---|---|---|---|
 | Установити APK | Package `com.thebifel.bubnilka` встановлюється | Не перевірено | Device-only |
 | Увімкнути й вибрати Бубнілку | IME з'являється у системному списку | Не перевірено | Device-only |
-| Диктовка українською | Видно partial, у поле йде лише styled final | Не перевірено | Device-only |
+| Диктовка українською | Видно partial, у поле йде лише styled final | Заблоковано → виправлено в коді | На пристрої немає on-device recognizer; додано system fallback |
+| Автозавантаження STT-моделі | Після fallback Android отримує запит на `uk-UA` offline-модель | Не перевірено | Система може показати підтвердження або відкласти download |
 | П'ять стилів | Стиль змінює форму, але не факти | Не перевірено | Device-only |
 | Undo / Regenerate | Заміна лише при точному збігу суфікса | Не перевірено | Device-only |
 | Немає мережі / квоти | Є Retry та Insert raw, без циклу retry | Не перевірено | Device-only |
@@ -23,7 +24,7 @@ Host artifact: `android-app/build/outputs/apk/debug/android-app-debug.apk` (gene
 ## Метрики першого проходу
 
 - Час від завершення мовлення до вставки: —
-- Помилки локального STT: —
+- Помилки локального STT: `isOnDeviceRecognitionAvailable=false`; реалізовано системний fallback
 - Несумісні застосунки або поля: —
 - Побажання до розміру клавіш/панелі: —
 
