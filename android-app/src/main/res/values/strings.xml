@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Бубнілка</string>
+    <string name="ime_name">Бубнілка</string>
+    <string name="ime_subtype_ukrainian">Бубнілка — українська</string>
+    <string name="onboarding_title">Говоріть — Бубнілка оформить</string>
+    <string name="cloud_disclosure">Голос розпізнається локально на телефоні. Лише фінальний транскрипт надсилається до Gemini через Firebase AI Logic для стилізації. На безкоштовному тарифі Google може використовувати ці дані для покращення сервісів. Не диктуйте паролі, платіжні чи інші чутливі дані.</string>
+    <string name="cloud_consent_checkbox">Я погоджуюся на описану хмарну обробку фінального транскрипту</string>
+    <string name="consent_accepted">Згоду надано. Її можна відкликати, знявши позначку.</string>
+    <string name="consent_required">Без згоди голосова й хмарна обробка вимкнені.</string>
+    <string name="microphone_granted">Доступ до мікрофона надано.</string>
+    <string name="microphone_not_granted">Для диктовки потрібен доступ до мікрофона.</string>
+    <string name="grant_microphone">Надати доступ до мікрофона</string>
+    <string name="enable_keyboard">1. Увімкнути Бубнілку</string>
+    <string name="select_keyboard">2. Вибрати Бубнілку</string>
+    <string name="setup_hint">Після цих кроків відкрийте будь-яке звичайне текстове поле й виберіть Бубнілку як клавіатуру.</string>
+    <string name="status_ready">Готова до диктовки</string>
+    <string name="status_listening">Слухаю локально… Натисніть мікрофон, щоб скасувати.</string>
+    <string name="status_transforming">Оформлюю текст у Gemini…</string>
+    <string name="status_inserted">Готово — текст вставлено</string>
+    <string name="status_cancelled">Диктовку скасовано</string>
+    <string name="status_sensitive_field">У чутливому полі диктовку вимкнено</string>
+    <string name="status_consent_required">Відкрийте Бубнілку та надайте згоду на cloud-обробку</string>
+    <string name="transcript_placeholder">Тут буде локальний транскрипт</string>
+    <string name="transcript_listening">Говоріть…</string>
+    <string name="transcript_sensitive_field">Бубнілка не читає і не обробляє паролі та PIN-коди.</string>
+    <string name="error_on_device_unavailable">On-device розпізнавання недоступне. Перевірте локальну українську мовну модель.</string>
+    <string name="error_microphone_permission">Надайте доступ до мікрофона в застосунку Бубнілка.</string>
+    <string name="error_no_speech">Мовлення не розпізнано. Спробуйте ще раз.</string>
+    <string name="error_cloud_not_configured">Firebase ще не налаштовано в цій збірці.</string>
+    <string name="error_network">Немає зв’язку з Gemini. Сирий текст збережено в цій сесії.</string>
+    <string name="error_quota">Безкоштовну квоту Gemini вичерпано. Спробуйте пізніше.</string>
+    <string name="error_unsupported_model">Ця модель Gemini більше недоступна. Потрібна нова збірка з підтримуваною моделлю.</string>
+    <string name="error_invalid_response">Gemini повернув некоректну відповідь. Сирий текст не втрачено.</string>
+    <string name="error_unsafe_replacement">Поле змінилося, тому Бубнілка нічого не видаляла.</string>
+    <string name="error_unexpected">Не вдалося завершити дію. Спробуйте ще раз.</string>
+    <string name="style_structured">Структуровано</string>
+    <string name="style_concise">Коротко</string>
+    <string name="style_professional">Ділово</string>
+    <string name="style_friendly">Дружньо</string>
+    <string name="style_viking">Вікінг</string>
+    <string name="start_dictation">Почати диктовку</string>
+    <string name="retry">Повторити</string>
+    <string name="insert_raw">Вставити як є</string>
+    <string name="undo">Скасувати</string>
+    <string name="regenerate">Перегенерувати</string>
+    <string name="switch_keyboard">Інша клавіатура</string>
+    <string name="keyboard_symbol" translatable="false">⌨</string>
+    <string name="microphone_symbol" translatable="false">🎙</string>
+</resources>

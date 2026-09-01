@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bubnilka_primary">#5B3FD6</color>
+    <color name="bubnilka_background">#F7F5FF</color>
+    <color name="bubnilka_surface">#FFFFFF</color>
+    <color name="bubnilka_text">#201A2B</color>
+    <color name="bubnilka_muted">#665F70</color>
+</resources>

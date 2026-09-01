@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<input-method xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="com.thebifel.bubnilka.MainActivity"
+    android:supportsSwitchingToNextInputMethod="true">
+    <subtype
+        android:imeSubtypeLocale="uk_UA"
+        android:imeSubtypeMode="keyboard"
+        android:isAsciiCapable="false"
+        android:label="@string/ime_subtype_ukrainian" />
+</input-method>

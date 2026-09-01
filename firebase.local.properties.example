@@ -1,0 +1,9 @@
+# Firebase Android app settings. These identify a project but are intentionally local.
+# Keep the project on Spark and do not link a Cloud Billing account for the MVP.
+firebase.apiKey=replace-with-web-api-key
+firebase.applicationId=1:000000000000:android:replace-me
+firebase.projectId=replace-with-project-id
+firebase.storageBucket=replace-with-project-id.firebasestorage.app
+
+# Must remain an allowlisted free-tier text model.
+firebase.geminiModel=gemini-3.5-flash-lite

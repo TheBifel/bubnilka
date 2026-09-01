@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="false"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            tools:ignore="ButtonStyle">
+
+            <Button
+                android:id="@+id/style_structured_button"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="@string/style_structured" />
+
+            <Button
+                android:id="@+id/style_concise_button"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="@string/style_concise" />
+
+            <Button
+                android:id="@+id/style_professional_button"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="@string/style_professional" />
+
+            <Button
+                android:id="@+id/style_friendly_button"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="@string/style_friendly" />
+
+            <Button
+                android:id="@+id/style_viking_button"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="@string/style_viking" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/keyboard_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/status_ready"
+        android:textColor="@color/bubnilka_muted"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/transcript_text"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/bubnilka_surface"
+        android:gravity="center_vertical"
+        android:maxLines="3"
+        android:padding="10dp"
+        android:text="@string/transcript_placeholder"
+        android:textColor="@color/bubnilka_text" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        tools:ignore="ButtonStyle">
+
+        <Button
+            android:id="@+id/switch_keyboard_button"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/switch_keyboard"
+            android:text="@string/keyboard_symbol" />
+
+        <Button
+            android:id="@+id/microphone_button"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginHorizontal="6dp"
+            android:layout_weight="2"
+            android:contentDescription="@string/start_dictation"
+            android:text="@string/microphone_symbol" />
+
+        <Button
+            android:id="@+id/retry_button"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:text="@string/retry"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/insert_raw_button"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:text="@string/insert_raw"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        tools:ignore="ButtonStyle">
+
+        <Button
+            android:id="@+id/undo_button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="@string/undo" />
+
+        <Button
+            android:id="@+id/regenerate_button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="@string/regenerate" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,22 @@
+package com.thebifel.bubnilka.core.model
+
+enum class KeyboardFailure {
+    UNSUPPORTED_ON_DEVICE_RECOGNITION,
+    PERMISSION_DENIED,
+    NO_SPEECH,
+    RECOGNITION_ERROR,
+    CLOUD_NOT_CONFIGURED,
+    NETWORK_UNAVAILABLE,
+    QUOTA_EXCEEDED,
+    UNSUPPORTED_MODEL,
+    INVALID_CLOUD_RESPONSE,
+    UNSAFE_REPLACEMENT,
+    CANCELLED,
+    UNEXPECTED,
+}
+
+enum class RecoveryAction {
+    RETRY,
+    INSERT_RAW,
+    DISMISS,
+}

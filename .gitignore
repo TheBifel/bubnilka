@@ -1,0 +1,32 @@
+# Gradle and build output
+.gradle/
+**/build/
+out/
+*.class
+*.jar
+*.iml
+*.log
+
+# IDE and operating system
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+
+# Local Android and Firebase configuration
+local.properties
+firebase.local.properties
+google-services.json
+**/google-services.json
+*.jks
+*.keystore
+
+# App Check and local secrets
+.env
+.env.*
+app-check-debug-token*
+
+# Device evidence can contain private text
+docs/device-feedback.local.md
