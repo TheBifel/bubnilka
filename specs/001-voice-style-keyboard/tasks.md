@@ -212,6 +212,19 @@ field and confirm no voice or cloud action can begin.
 
 ---
 
+## Phase 10: Headless Emulator and Keyboard UI Feedback
+
+- [X] T049 Hot-plug KVM into the build LXC, install API 35 emulator tooling, and create a reusable
+  headless AVD launcher.
+- [X] T050 Add an ADB/UIAutomator active-window inspector with exact view bounds and actions.
+- [X] T051 Add a debug-only direct IME inspector because UIAutomator omits the keyboard window.
+- [X] T052 Replace native gray controls with stateful style chips, vector action icons, a transcript
+  panel, contextual recovery actions, and navigation-bar-safe spacing.
+- [X] T053 Validate style selection and `abc → ab` Backspace behavior on the emulator, run host and
+  UI performance checks, and publish the verified APK.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

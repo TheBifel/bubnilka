@@ -46,7 +46,4 @@
     <string name="regenerate">Перегенерувати</string>
     <string name="switch_keyboard">Інша клавіатура</string>
     <string name="backspace">Видалити попередній символ</string>
-    <string name="keyboard_symbol" translatable="false">⌨</string>
-    <string name="microphone_symbol" translatable="false">🎙</string>
-    <string name="backspace_symbol" translatable="false">⌫</string>
 </resources>

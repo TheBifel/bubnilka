@@ -15,6 +15,7 @@ import com.thebifel.bubnilka.core.model.RecoveryAction
 import com.thebifel.bubnilka.core.model.StylePreset
 import com.thebifel.bubnilka.core.session.KeyboardSession
 import com.thebifel.bubnilka.core.session.VoiceFlow
+import com.thebifel.bubnilka.debug.UiInspector
 import com.thebifel.bubnilka.runtime.BubnilkaLog
 import com.thebifel.bubnilka.runtime.CoroutineOwner
 import com.thebifel.bubnilka.speech.AndroidSpeechToTextProvider
@@ -33,6 +34,7 @@ class BubnilkaInputMethodService : InputMethodService() {
     override fun onCreateInputView(): View {
         val view = layoutInflater.inflate(R.layout.keyboard_view, null)
         keyboardView = view
+        UiInspector.attach(view)
         cloudConsentAccepted = consentRepository.isAccepted()
         val speech = AndroidSpeechToTextProvider(this)
         speechProvider = speech
@@ -54,7 +56,7 @@ class BubnilkaInputMethodService : InputMethodService() {
         bindStyle(view, R.id.style_friendly_button, StylePreset.FRIENDLY)
         bindStyle(view, R.id.style_viking_button, StylePreset.VIKING)
 
-        view.findViewById<Button>(R.id.microphone_button).setOnClickListener {
+        view.findViewById<View>(R.id.microphone_button).setOnClickListener {
             if (!cloudConsentAccepted) return@setOnClickListener
             when (session.state) {
                 is KeyboardState.Listening -> voiceFlow?.cancel()
@@ -74,14 +76,14 @@ class BubnilkaInputMethodService : InputMethodService() {
         view.findViewById<Button>(R.id.insert_raw_button).setOnClickListener {
             voiceFlow?.insertRaw()
         }
-        view.findViewById<Button>(R.id.switch_keyboard_button).setOnClickListener {
+        view.findViewById<View>(R.id.switch_keyboard_button).setOnClickListener {
             if (shouldOfferSwitchingToNextInputMethod()) {
                 switchToNextInputMethod(false)
             } else {
                 getSystemService(InputMethodManager::class.java).showInputMethodPicker()
             }
         }
-        view.findViewById<Button>(R.id.backspace_button).setOnClickListener {
+        view.findViewById<View>(R.id.backspace_button).setOnClickListener {
             insertion.backspace()
         }
         applyEditorPolicy(currentInputEditorInfo)
@@ -114,6 +116,7 @@ class BubnilkaInputMethodService : InputMethodService() {
     override fun onDestroy() {
         voiceFlow?.close()
         speechProvider = null
+        UiInspector.detach(keyboardView)
         keyboardView = null
         coroutineOwner.close()
         super.onDestroy()
@@ -139,12 +142,14 @@ class BubnilkaInputMethodService : InputMethodService() {
         val view = keyboardView ?: return
         val status = view.findViewById<TextView>(R.id.keyboard_status)
         val transcript = view.findViewById<TextView>(R.id.transcript_text)
-        val microphone = view.findViewById<Button>(R.id.microphone_button)
+        val microphone = view.findViewById<View>(R.id.microphone_button)
         val retry = view.findViewById<Button>(R.id.retry_button)
         val insertRaw = view.findViewById<Button>(R.id.insert_raw_button)
+        val recoveryActions = view.findViewById<View>(R.id.recovery_actions)
 
         retry.visibility = View.GONE
         insertRaw.visibility = View.GONE
+        recoveryActions.visibility = View.GONE
 
         when (state) {
             is KeyboardState.Idle -> {
@@ -173,6 +178,12 @@ class BubnilkaInputMethodService : InputMethodService() {
                 microphone.isEnabled = true
                 retry.visibility = if (RecoveryAction.RETRY in state.actions) View.VISIBLE else View.GONE
                 insertRaw.visibility = if (RecoveryAction.INSERT_RAW in state.actions) View.VISIBLE else View.GONE
+                recoveryActions.visibility =
+                    if (retry.visibility == View.VISIBLE || insertRaw.visibility == View.VISIBLE) {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
             }
             KeyboardState.SensitiveField -> {
                 status.setText(R.string.status_sensitive_field)
@@ -199,6 +210,8 @@ class BubnilkaInputMethodService : InputMethodService() {
             state !is KeyboardState.Transforming &&
             state !is KeyboardState.Listening &&
             state !is KeyboardState.SensitiveField
+        view.findViewById<View>(R.id.post_insert_actions).visibility =
+            if (mayEditInsertion) View.VISIBLE else View.GONE
         view.findViewById<Button>(R.id.undo_button).isEnabled = mayEditInsertion
         view.findViewById<Button>(R.id.regenerate_button).isEnabled = mayEditInsertion && cloudConsentAccepted
 
@@ -206,13 +219,14 @@ class BubnilkaInputMethodService : InputMethodService() {
             status.setText(R.string.status_consent_required)
             microphone.isEnabled = false
             retry.visibility = View.GONE
+            recoveryActions.visibility = View.GONE
         }
     }
 
     private fun renderStyle(view: View, buttonId: Int, selected: Boolean) {
         view.findViewById<Button>(buttonId).apply {
             isSelected = selected
-            alpha = if (selected) 1f else 0.55f
+            alpha = 1f
         }
     }
 

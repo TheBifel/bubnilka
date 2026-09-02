@@ -3,49 +3,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/keyboard_panel"
+    android:clipToPadding="false"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:paddingStart="12dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="32dp">
 
     <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:fillViewport="false"
+        android:overScrollMode="never"
         android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="horizontal"
             tools:ignore="ButtonStyle">
 
             <Button
                 android:id="@+id/style_structured_button"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                style="@style/BubnilkaStyleChip"
                 android:text="@string/style_structured" />
 
             <Button
                 android:id="@+id/style_concise_button"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                style="@style/BubnilkaStyleChip"
                 android:text="@string/style_concise" />
 
             <Button
                 android:id="@+id/style_professional_button"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                style="@style/BubnilkaStyleChip"
                 android:text="@string/style_professional" />
 
             <Button
                 android:id="@+id/style_friendly_button"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                style="@style/BubnilkaStyleChip"
                 android:text="@string/style_friendly" />
 
             <Button
                 android:id="@+id/style_viking_button"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                style="@style/BubnilkaStyleChip"
+                android:layout_marginEnd="0dp"
                 android:text="@string/style_viking" />
         </LinearLayout>
     </HorizontalScrollView>
@@ -54,93 +56,121 @@
         android:id="@+id/keyboard_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="7dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:text="@string/status_ready"
         android:textColor="@color/bubnilka_muted"
-        android:textSize="13sp" />
+        android:textSize="12sp" />
 
     <TextView
         android:id="@+id/transcript_text"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:layout_marginTop="4dp"
-        android:background="@color/bubnilka_surface"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/transcript_panel"
         android:gravity="center_vertical"
         android:maxLines="3"
-        android:padding="10dp"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="9dp"
         android:text="@string/transcript_placeholder"
-        android:textColor="@color/bubnilka_text" />
+        android:textColor="@color/bubnilka_text"
+        android:textSize="15sp" />
 
     <LinearLayout
+        android:id="@+id/primary_actions"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        tools:ignore="ButtonStyle">
+        android:layout_height="64dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        <Button
+        <ImageButton
             android:id="@+id/switch_keyboard_button"
-            android:layout_width="0dp"
+            android:layout_width="52dp"
             android:layout_height="52dp"
-            android:layout_weight="1"
+            android:background="@drawable/utility_button"
             android:contentDescription="@string/switch_keyboard"
-            android:text="@string/keyboard_symbol" />
+            android:padding="13dp"
+            android:src="@drawable/ic_keyboard" />
 
-        <Button
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <ImageButton
             android:id="@+id/microphone_button"
-            android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_marginHorizontal="6dp"
-            android:layout_weight="2"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/microphone_button"
             android:contentDescription="@string/start_dictation"
-            android:text="@string/microphone_symbol" />
+            android:padding="18dp"
+            android:src="@drawable/ic_mic" />
 
-        <Button
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <ImageButton
             android:id="@+id/backspace_button"
-            android:layout_width="0dp"
+            android:layout_width="52dp"
             android:layout_height="52dp"
-            android:layout_weight="1"
+            android:background="@drawable/utility_button"
             android:contentDescription="@string/backspace"
-            android:text="@string/backspace_symbol" />
-
-        <Button
-            android:id="@+id/retry_button"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_weight="1"
-            android:text="@string/retry"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/insert_raw_button"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_weight="1"
-            android:text="@string/insert_raw"
-            android:visibility="gone" />
+            android:padding="13dp"
+            android:src="@drawable/ic_backspace" />
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/recovery_actions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:orientation="horizontal"
+        android:visibility="gone"
+        tools:ignore="ButtonStyle">
+
+        <Button
+            android:id="@+id/retry_button"
+            style="@style/BubnilkaSecondaryButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="@string/retry" />
+
+        <Button
+            android:id="@+id/insert_raw_button"
+            style="@style/BubnilkaSecondaryButton"
+            android:layout_width="0dp"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:text="@string/insert_raw" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/post_insert_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
         tools:ignore="ButtonStyle">
 
         <Button
             android:id="@+id/undo_button"
+            style="@style/BubnilkaSecondaryButton"
             android:layout_width="0dp"
-            android:layout_height="48dp"
             android:layout_weight="1"
-            android:enabled="false"
             android:text="@string/undo" />
 
         <Button
             android:id="@+id/regenerate_button"
+            style="@style/BubnilkaSecondaryButton"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_marginStart="6dp"
             android:layout_weight="1"
-            android:enabled="false"
             android:text="@string/regenerate" />
     </LinearLayout>
 </LinearLayout>

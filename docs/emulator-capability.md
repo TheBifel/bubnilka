@@ -1,37 +1,69 @@
-# Android emulator capability on ai-agent-hub
+# Android emulator на ai-agent-hub
 
-Дата перевірки: 2026-09-01 UTC
+Дата перевірки: 2026-09-02 UTC
 
 ## Поточний стан
 
-- Build container: Proxmox LXC `107 ai-agent-hub`, unprivileged, 2 CPU, 4 GiB RAM, 512 MiB swap.
-- Host: Intel N100, VT-x доступний, `/dev/kvm` існує на Proxmox host.
-- Container: CPU flag `vmx` видимий, але `/dev/kvm` не передано.
-- Android SDK: `adb` 37.0.1 встановлений; emulator package, system images та AVD відсутні.
-- Підключених ADB-пристроїв під час перевірки немає.
+- Build container: Proxmox LXC `107 ai-agent-hub`, unprivileged, 3 CPU, 5 GiB RAM, 1 GiB swap.
+- Proxmox host: Intel N100; `/dev/kvm` передано в контейнер як `dev0` з mode `0666` без restart.
+- `emulator -accel-check`: `KVM (version 12) is installed and usable`.
+- Android Emulator 37.1.11, platform-tools 37.0.1, API 35 Google APIs x86_64 image.
+- AVD: `bubnilka_api35`, Pixel 6 profile, 1080×2400, density 420, headless SwiftShader.
+- Перевірений serial: `emulator-5554`, Android 15; debug APK встановлюється, IME вмикається і
+  керується через ADB.
 
-Без `/dev/kvm` x86_64 emulator працюватиме через повну програмну трансляцію і не підходить для
-регулярного UI feedback loop на виділених контейнеру ресурсах.
+Контейнер збільшено гаряче з 2 CPU/4 GiB до 3 CPU/5 GiB. Перезапуск LXC не виконувався. API 35
+guest використовує близько 3.5–3.7 GiB RSS, тому одночасний clean Gradle build суттєво впливає на
+його швидкодію.
 
-## Робочий варіант
+## Запуск
 
-1. Передати `/dev/kvm` у CT 107 і надати `aiagent` доступ до пристрою.
-2. Бажано виділити контейнеру щонайменше 3 CPU та 6–8 GiB RAM на час emulator-сесій.
-3. Встановити Android Emulator і одну x86_64 Google APIs system image.
-4. Створити невеликий phone AVD та запускати його headless із software GPU rendering.
+```bash
+./scripts/android-emulator.sh start
+```
 
-Після цього Codex зможе:
+Команда навмисно тримає emulator у foreground. В іншому shell:
 
-- запускати/зупиняти AVD без графічного вікна;
-- встановлювати APK через `adb install -r`;
-- відкривати Activity, натискати координати, вводити текст і перемикати IME;
-- читати UI hierarchy через UIAutomator;
-- отримувати PNG через `adb exec-out screencap -p` і аналізувати скриншоти;
-- збирати Logcat і повторювати screenshot-driven UX перевірки.
+```bash
+./scripts/android-emulator.sh wait
+./scripts/android-emulator.sh status
+./scripts/android-emulator.sh install
+./scripts/android-emulator.sh stop
+```
 
-Емулятор придатний для layout, onboarding, станів клавіатури, backspace та базового insertion flow.
-Реальний телефон усе одно потрібен для достовірної перевірки мікрофона, системного STT, App Check,
-Gemini latency та поведінки IME у сторонніх застосунках.
+Foreground-процес надійніший у цьому LXC за `nohup`, оскільки тут немає user systemd/desktop
+session. Codex запускає його в довгоживучій PTY-сесії.
+
+## Текстовий screen inspector
+
+`scripts/android-screen.sh` поєднує два джерела:
+
+1. UIAutomator XML для активного Activity — він дає точні bounds, але не бачить окреме IME window.
+2. Debug-only receiver Бубнілки — він обходить реальне дерево `keyboardView` і повертає bounds,
+   center, size, visibility, enabled/clickable/selected, class, resource ID, text та description.
+
+```bash
+./scripts/android-screen.sh window --actionable
+./scripts/android-screen.sh ime --actionable
+./scripts/android-screen.sh tree
+./scripts/android-screen.sh tap 979 2231
+./scripts/android-screen.sh text abc
+./scripts/android-screen.sh screenshot /tmp/bubnilka.png
+```
+
+Під час перевірки direct IME dump займав 65 ms, повне дерево з UIAutomator — 2.4–3.5 s, PNG capture
+— 0.28–0.29 s без вартості подальшого image-аналізу. Тому для клавіатури основний feedback loop —
+`ime`, а PNG лишається fallback для кольорів, шрифтів, clipping та системних overlays.
+
+## Межі доказів
+
+Емулятор придатний для layout, onboarding, state rendering, вибору стилю, Backspace, insertion,
+accessibility-міток і базових performance smoke tests. SwiftShader на Intel N100 не репрезентує GPU
+реального телефона: швидке перемикання чипів показало 50-й percentile 48 ms і 93.75% janky frames,
+тому ці frame numbers є характеристикою headless host, а не Android UI Бубнілки.
+
+Фізичний телефон досі потрібен для правдивої перевірки мікрофона, системного STT, App Check,
+Gemini latency та поведінки `InputConnection` у конкретних сторонніх застосунках.
 
 ## Джерела
 

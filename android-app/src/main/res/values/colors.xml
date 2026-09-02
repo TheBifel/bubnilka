@@ -5,4 +5,11 @@
     <color name="bubnilka_surface">#FFFFFF</color>
     <color name="bubnilka_text">#201A2B</color>
     <color name="bubnilka_muted">#665F70</color>
+    <color name="bubnilka_on_primary">#FFFFFF</color>
+    <color name="bubnilka_primary_pressed">#4930BA</color>
+    <color name="bubnilka_chip">#ECE8FA</color>
+    <color name="bubnilka_chip_pressed">#DDD6F5</color>
+    <color name="bubnilka_outline">#D7D0E3</color>
+    <color name="bubnilka_disabled">#AAA2B5</color>
+    <color name="bubnilka_disabled_surface">#E6E2EB</color>
 </resources>

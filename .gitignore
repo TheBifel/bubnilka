@@ -14,6 +14,8 @@ out/
 Thumbs.db
 *.swp
 *.tmp
+__pycache__/
+*.pyc
 
 # Local Android and Firebase configuration
 local.properties

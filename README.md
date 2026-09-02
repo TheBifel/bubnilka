@@ -25,6 +25,31 @@
 ./scripts/verify.sh
 ```
 
+### Headless emulator і текстовий огляд UI
+
+На `ai-agent-hub` налаштовано KVM-прискорений AVD `bubnilka_api35`. Запуск є foreground-командою,
+щоб життєвий цикл emulator не залежав від прихованого desktop-сеансу:
+
+```bash
+./scripts/android-emulator.sh start
+# в іншому shell
+./scripts/android-emulator.sh wait
+./scripts/android-emulator.sh install
+```
+
+Замість скриншота UI можна читати як дерево з точними bounds, центрами та станами:
+
+```bash
+./scripts/android-screen.sh window --actionable # активне Activity
+./scripts/android-screen.sh ime --actionable    # швидкий direct-dump клавіатури
+./scripts/android-screen.sh tree                # обидва дерева повністю
+./scripts/android-screen.sh tap 540 2232
+./scripts/android-screen.sh screenshot          # fallback у /tmp
+./scripts/android-benchmark.sh
+```
+
+Direct IME dump доступний лише у debug APK. Release manifest не експортує діагностичний receiver.
+
 Чистий checkout збирається без Firebase-конфігурації. Для реального cloud-перетворення скопіюйте
 `firebase.local.properties.example` у `firebase.local.properties` та заповніть ідентифікатори
 власного Firebase Spark-проєкту.
