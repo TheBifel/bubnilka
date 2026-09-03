@@ -44,7 +44,7 @@ class ConsentRepository(
     }
 
     companion object {
-        const val CURRENT_DISCLOSURE_VERSION: Int = 2
+        const val CURRENT_DISCLOSURE_VERSION: Int = 3
         private const val PREFERENCES_NAME = "bubnilka_privacy"
 
         fun from(context: Context): ConsentRepository = ConsentRepository(

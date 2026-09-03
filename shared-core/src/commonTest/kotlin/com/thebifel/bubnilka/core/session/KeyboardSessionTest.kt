@@ -1,6 +1,7 @@
 package com.thebifel.bubnilka.core.session
 
 import com.thebifel.bubnilka.core.model.KeyboardState
+import com.thebifel.bubnilka.core.model.LanguageMode
 import com.thebifel.bubnilka.core.model.StylePreset
 import com.thebifel.bubnilka.core.model.TransformationResult
 import kotlin.test.Test
@@ -43,6 +44,29 @@ class KeyboardSessionTest {
         assertEquals(StylePreset.STRUCTURED.id, request?.styleId)
         val state = assertIs<KeyboardState.Transforming>(session.state)
         assertEquals("привіт світе", state.rawTranscript)
+    }
+
+    @Test
+    fun selectedTranslationModeControlsSpeechAndOutputLanguages() {
+        val session = KeyboardSession()
+        session.selectLanguageMode(LanguageMode.ENGLISH_TO_UKRAINIAN)
+        val sessionId = session.startListening()
+
+        val request = session.onFinalTranscript(sessionId, "Keep every detail")
+
+        assertEquals("en-US", session.activeSpeechLanguageTag)
+        assertEquals("en-US", request?.sourceLanguageTag)
+        assertEquals("uk-UA", request?.targetLanguageTag)
+    }
+
+    @Test
+    fun wholeFieldContextIsPreservedInTransformationRequest() {
+        val session = KeyboardSession()
+        val sessionId = session.startListening(existingFieldText = "Вже написаний текст")
+
+        val request = session.onFinalTranscript(sessionId, "і нова думка")
+
+        assertEquals("Вже написаний текст", request?.existingFieldText)
     }
 
     @Test

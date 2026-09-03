@@ -225,6 +225,19 @@ field and confirm no voice or cloud action can begin.
 
 ---
 
+## Phase 11: Bilingual Translation, Live Preview, and Whole-Field Context
+
+- [X] T054 Add tested UA, EN, UA→EN, and EN→UA language-mode contracts and prompt invariants.
+- [X] T055 Add bounded whole-field snapshot/replace/undo operations with exact concurrent-edit
+  protection and explicit privacy disclosure version 3.
+- [X] T056 Add a gear popup for language/translation and Field + voice selection.
+- [X] T057 Start recognition automatically when the consented keyboard opens outside secure fields.
+- [X] T058 Make transcript preview auto-follow new partials while retaining manual scroll control.
+- [X] T059 Change Structured to preserve original wording and apply only light document structure.
+- [X] T060 Run full verification, emulator smoke tests, publish APK, commit, and push.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

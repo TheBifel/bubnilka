@@ -4,7 +4,7 @@
     <string name="ime_name">Бубнілка</string>
     <string name="ime_subtype_ukrainian">Бубнілка — українська</string>
     <string name="onboarding_title">Говоріть — Бубнілка оформить</string>
-    <string name="cloud_disclosure">Бубнілка спочатку використовує локальне розпізнавання. Якщо воно недоступне, аудіо може оброблятися системною службою розпізнавання мовлення, наприклад Google, відповідно до її налаштувань. Застосунок автоматично попросить службу завантажити українську offline-модель для наступних диктовок. Фінальний транскрипт надсилається до Gemini через Firebase AI Logic для стилізації. На безкоштовному тарифі Google може використовувати надіслані дані для покращення сервісів. Не диктуйте паролі, платіжні чи інші чутливі дані.</string>
+    <string name="cloud_disclosure">Після надання згоди Бубнілка автоматично починає слухати при відкритті клавіатури. Вона спочатку використовує локальне розпізнавання. Якщо воно недоступне, аудіо може оброблятися системною службою розпізнавання мовлення, наприклад Google, відповідно до її налаштувань. Застосунок автоматично попросить службу завантажити українську або англійську offline-модель для наступних диктовок. Фінальний транскрипт надсилається до Gemini через Firebase AI Logic для стилізації чи перекладу. Коли ви явно вмикаєте «Поле + голос», до Gemini також надсилається весь поточний текст активного поля, щоб об’єднати його з новою диктовкою. На безкоштовному тарифі Google може використовувати надіслані дані для покращення сервісів. Не диктуйте паролі, платіжні чи інші чутливі дані.</string>
     <string name="cloud_consent_checkbox">Я погоджуюся на описану обробку аудіо та фінального транскрипту</string>
     <string name="consent_accepted">Згоду надано. Її можна відкликати, знявши позначку.</string>
     <string name="consent_required">Без згоди голосова й хмарна обробка вимкнені.</string>
@@ -39,6 +39,15 @@
     <string name="style_professional">Ділово</string>
     <string name="style_friendly">Дружньо</string>
     <string name="style_viking">Вікінг</string>
+    <string name="language_settings">Мова та переклад</string>
+    <string name="field_context_menu">Поле + голос</string>
+    <string name="language_ukrainian">Українська</string>
+    <string name="language_english">English</string>
+    <string name="language_uk_to_en_full">Українська → English</string>
+    <string name="language_en_to_uk_full">English → Українська</string>
+    <string name="language_settings_selected">Мова та переклад: %1$s</string>
+    <string name="language_settings_selected_with_field">Мова та переклад: %1$s, Поле + голос увімкнено</string>
+    <string name="cancel_dictation">Скасувати диктовку</string>
     <string name="start_dictation">Почати диктовку</string>
     <string name="retry">Повторити</string>
     <string name="insert_raw">Вставити як є</string>

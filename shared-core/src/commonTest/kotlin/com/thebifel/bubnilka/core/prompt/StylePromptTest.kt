@@ -9,6 +9,15 @@ import kotlin.test.assertTrue
 
 class StylePromptTest {
     @Test
+    fun structuredStylePreservesVoiceAndOnlyAddsLightStructure() {
+        val instruction = StylePreset.STRUCTURED.instruction.lowercase()
+
+        assertContains(instruction, "не перефразовуй")
+        assertContains(instruction, "абзаци")
+        assertContains(instruction, "нумерацію")
+    }
+
+    @Test
     fun everyStyleHasStableUniqueMetadataAndPromptInstruction() {
         assertEquals(5, StylePreset.entries.size)
         assertEquals(StylePreset.entries.size, StylePreset.entries.map { it.id }.toSet().size)

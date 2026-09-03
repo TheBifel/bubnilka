@@ -13,6 +13,8 @@ Validation: IDs are unique; title and instruction are nonblank; Structured is th
 
 - `id`: monotonically unique value for stale-result rejection
 - `selectedStyle`: `StylePreset`
+- `selectedLanguageMode`: one of UA, EN, UA→EN, EN→UA
+- `existingFieldText`: optional memory-only snapshot captured by explicit Field + voice mode
 - `state`: one `KeyboardState`
 - `partialTranscript`: transient text visible only while listening
 - `rawTranscript`: transient final recognition result
@@ -46,9 +48,12 @@ Only events carrying the current session ID may change state.
 - `sessionId`
 - `rawTranscript`: 1..2,000 trimmed characters
 - `styleId`
-- `languageTag`: initially `uk-UA`
+- `sourceLanguageTag`: `uk-UA` or `en-US`
+- `targetLanguageTag`: `uk-UA` or `en-US`
+- `existingFieldText`: optional, at most 6,000 characters; `null` means transcript-only insertion
 
-The request contains no host-field context, cursor context, application name, or device identifier.
+The request contains no application name, device identifier, or history. Host-field content is
+included only for the explicit Field + voice operation and is never persisted.
 
 ## TransformationResult
 
@@ -57,6 +62,9 @@ The request contains no host-field context, cursor context, application name, or
 - `text`: trimmed, nonempty, at most the configured result limit
 
 Validation rejects mismatched session/style IDs, empty output, and obvious assistant preambles.
+
+`InsertionRecord` keeps the optional exact pre-replacement field snapshot in memory so whole-field
+Undo can restore it safely. The snapshot is cleared with the session and is never persisted.
 
 ## InsertionRecord
 

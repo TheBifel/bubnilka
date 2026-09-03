@@ -8,4 +8,8 @@ interface TextInsertionPort {
     fun replace(previous: String, replacement: String): Boolean
 
     fun undo(previous: String): Boolean
+
+    fun readAllText(): String? = null
+
+    fun replaceAll(expected: String, replacement: String): Boolean = false
 }

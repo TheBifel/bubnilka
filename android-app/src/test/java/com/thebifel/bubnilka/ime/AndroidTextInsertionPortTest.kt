@@ -44,6 +44,20 @@ class AndroidTextInsertionPortTest {
         assertEquals(1, connection.backspaceCalls)
     }
 
+    @Test
+    fun readsAndReplacesTheEntireFieldOnlyWhenUnchanged() {
+        val connection = FakeCursorConnection("Поточний текст")
+        val port = AndroidTextInsertionPort { connection }
+
+        assertEquals("Поточний текст", port.readAllText())
+        assertFalse(port.replaceAll("Інший текст", "Результат"))
+        assertEquals("Поточний текст", connection.content)
+        assertTrue(port.replaceAll("Поточний текст", "Повний результат"))
+        assertEquals("Повний результат", connection.content)
+        assertTrue(port.replaceAll("Повний результат", ""))
+        assertEquals("", connection.content)
+    }
+
     private class FakeCursorConnection(initialContent: String) : CursorConnection {
         var content: String = initialContent
         var deleteCalls: Int = 0
@@ -65,6 +79,15 @@ class AndroidTextInsertionPortTest {
         override fun backspace(): Boolean {
             backspaceCalls += 1
             content = content.dropLast(1)
+            return true
+        }
+
+        override fun allText(maxCharacters: Int): CharSequence? =
+            content.takeIf { it.length <= maxCharacters }
+
+        override fun replaceAll(expected: String, replacement: String): Boolean {
+            if (content != expected) return false
+            content = replacement
             return true
         }
     }

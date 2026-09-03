@@ -7,8 +7,9 @@
 **Status**: Ready for planning
 
 **Input**: User description: "Build the Android MVP of Bubnilka: a voice-first keyboard that
-prefers local speech transcription with an automatic system/cloud fallback, transforms the
-transcript in a selected cloud style, and inserts the result into the active text field. Ask the
+prefers local Ukrainian or English speech transcription with an automatic system/cloud fallback,
+optionally translates in either direction, transforms the transcript in a selected cloud style,
+and inserts the result into the active text field. Ask the
 system recognizer to download an offline model for future sessions. Keep the product future-ready
 for shared mobile logic, but do not build or compile iOS. The installed app must not depend on the
 development server and must stay within a no-payment cloud tier."
@@ -17,9 +18,9 @@ development server and must stay within a no-payment cloud tier."
 
 ### User Story 1 - Dictate and Insert Styled Text (Priority: P1)
 
-After enabling Bubnilka as a keyboard, the user opens any supported text field, chooses the
-keyboard, taps the microphone, dictates a message, and receives a polished version inserted into
-the field without manually copying or pasting.
+After enabling Bubnilka as a keyboard, the user opens any supported text field and the keyboard
+automatically starts listening. The user dictates a message and receives a polished version
+inserted into the field without manually copying or pasting.
 
 **Why this priority**: This is the complete value proposition and the smallest useful product
 slice.
@@ -29,13 +30,16 @@ supported app, and verify that the transformed result appears at the cursor.
 
 **Acceptance Scenarios**:
 
-1. **Given** Bubnilka is enabled and a regular text field is focused, **When** the user taps the
-   microphone, dictates a message, and stops, **Then** the keyboard displays the recognized text
+1. **Given** Bubnilka is enabled, disclosure consent is current, and a regular field is focused,
+   **When** the keyboard opens, **Then** it starts listening without an extra microphone tap,
+   displays recognized text
    while it is being prepared and inserts only the final transformed text into the field.
 2. **Given** a transformation is in progress, **When** the cloud result has not arrived,
    **Then** no partial or raw transcript is inserted into the host field.
 3. **Given** the user has selected no explicit style, **When** a transcript is transformed,
    **Then** the Structured style is applied by default.
+4. **Given** a long partial transcript, **When** new words arrive, **Then** preview follows the
+   bottom automatically unless the user has manually scrolled upward.
 
 ---
 
@@ -103,6 +107,26 @@ and secure fields without examining implementation details.
 2. **Given** a password or other secure field is focused, **When** Bubnilka becomes active,
    **Then** microphone and cloud actions are disabled and no dictated content is captured.
 
+---
+
+### User Story 5 - Select Language, Translate, and Extend a Field (Priority: P2)
+
+The user opens a gear menu to select Ukrainian, English, Ukrainian-to-English, or
+English-to-Ukrainian. An explicit Field + voice option combines a snapshot of the entire editor
+with new dictation and replaces the whole field only if it is still unchanged.
+
+**Acceptance Scenarios**:
+
+1. **Given** UA→EN is selected, **When** Ukrainian speech is recognized, **Then** the result is
+   English and retains every name, number, fact, nuance, and intent.
+2. **Given** EN→UA is selected, **When** English speech is recognized, **Then** the result is
+   Ukrainian with the same meaning.
+3. **Given** Field + voice is enabled, **When** dictation completes, **Then** the complete field and
+   additional transcript are sent as separate untrusted data sections and the returned complete
+   text safely replaces the field.
+4. **Given** the host field changes after its snapshot, **When** the result arrives, **Then** no
+   replacement occurs and an unsafe-replacement failure is shown.
+
 ### Edge Cases
 
 - The user stops recording without speaking or recognition returns an empty result.
@@ -112,6 +136,8 @@ and secure fields without examining implementation details.
 - The transformed result contains leading commentary instead of only the requested text.
 - The host application closes, changes selection, or changes fields before the result arrives.
 - A transcript is longer than the cloud request limit.
+- Field + voice is selected for an editor that cannot expose complete extracted text or exceeds
+  the 6,000-character context limit.
 - The user taps the microphone or regenerate button repeatedly while work is already active.
 - The selected style changes while an earlier request is still running.
 
@@ -130,8 +156,8 @@ and secure fields without examining implementation details.
   inserts raw text or a successful transformation is ready.
 - **FR-005**: The keyboard MUST provide Structured, Concise, Formal, Friendly, and Viking styles,
   with Structured selected by default.
-- **FR-006**: A cloud transformation MUST preserve the source language, names, numbers, links, and
-  factual meaning while returning only the rewritten text.
+- **FR-006**: A cloud transformation MUST use the selected output language and preserve names,
+  numbers, links, factual meaning, nuances, and intent while returning only the rewritten text.
 - **FR-007**: On successful transformation, the keyboard MUST insert the complete result at the
   current cursor position without a copy/paste step.
 - **FR-008**: The keyboard MUST allow safe undo of its latest insertion when the inserted text is
@@ -159,10 +185,21 @@ and secure fields without examining implementation details.
   current selection or one Unicode code point before the cursor through the active input connection.
 - **FR-020**: Cloud transformation diagnostics MUST record request duration and failure category
   without recording prompts, transcripts, generated output, or other user content.
+- **FR-021**: The keyboard MUST support Ukrainian and English recognition plus UA→EN and EN→UA
+  translation modes selected from a gear popup.
+- **FR-022**: After current disclosure consent, the keyboard MUST automatically start listening
+  whenever it opens in a supported non-sensitive field.
+- **FR-023**: The transcript preview MUST automatically follow new partial text to the bottom and
+  MUST allow manual scrolling; auto-follow pauses while the user remains scrolled upward.
+- **FR-024**: Structured MUST preserve the author's wording, tone, length, and order, applying only
+  punctuation, paragraphs, and numbering/list markers already implied by the content.
+- **FR-025**: Field + voice MUST be explicit, MUST disclose complete field upload, and MUST replace
+  the whole editor only after an exact unchanged-text check.
 
 ### Key Entities
 
 - **Style preset**: A stable style identifier, user-facing title, and transformation intent.
+- **Language mode**: Recognition and output language pair for monolingual or translation flows.
 - **Dictation session**: The active session identity, selected style, partial/final transcript,
   lifecycle state, and recoverable failure if any.
 - **Transformation result**: The returned text and the session/style identifiers that prove it
@@ -181,8 +218,8 @@ and secure fields without examining implementation details.
 - **SC-002**: For a typical message of up to 500 characters, the transformed text appears within
   10 seconds after speech recognition completes under a working network connection in at least 9 of
   10 manual trials.
-- **SC-003**: In a fixed set of 20 Ukrainian test transcripts, every result retains all names,
-  numbers, and links, preserves the source language, and contains no assistant preamble.
+- **SC-003**: In fixed Ukrainian and English corpora, monolingual and bidirectional translation
+  results retain all names, numbers, links, meaning, and contain no assistant preamble.
 - **SC-004**: All simulated recognition and cloud failure categories recover to an actionable
   state within 2 seconds and never insert partial text automatically.
 - **SC-005**: Automated tests cover every deterministic state transition and style prompt rule,

@@ -1,13 +1,16 @@
 package com.thebifel.bubnilka.core.model
 
 const val MAX_TRANSCRIPT_LENGTH: Int = 2_000
-const val MAX_TRANSFORMED_LENGTH: Int = 4_000
+const val MAX_FIELD_CONTEXT_LENGTH: Int = 6_000
+const val MAX_TRANSFORMED_LENGTH: Int = 8_000
 
 data class TransformationRequest(
     val sessionId: Long,
     val rawTranscript: String,
     val styleId: String,
-    val languageTag: String = "uk-UA",
+    val sourceLanguageTag: String = "uk-UA",
+    val targetLanguageTag: String = sourceLanguageTag,
+    val existingFieldText: String? = null,
 ) {
     init {
         require(sessionId > 0)
@@ -15,7 +18,9 @@ data class TransformationRequest(
         require(rawTranscript.length <= MAX_TRANSCRIPT_LENGTH)
         require(rawTranscript == rawTranscript.trim())
         require(StylePreset.fromId(styleId) != null)
-        require(languageTag.isNotBlank())
+        require(LanguageMode.supports(sourceLanguageTag))
+        require(LanguageMode.supports(targetLanguageTag))
+        require(existingFieldText == null || existingFieldText.length <= MAX_FIELD_CONTEXT_LENGTH)
     }
 }
 

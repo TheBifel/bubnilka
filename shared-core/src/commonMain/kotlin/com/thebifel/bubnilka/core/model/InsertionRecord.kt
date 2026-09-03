@@ -5,4 +5,5 @@ data class InsertionRecord(
     val rawTranscript: String,
     val insertedText: String,
     val styleId: String,
+    val existingFieldText: String? = null,
 )

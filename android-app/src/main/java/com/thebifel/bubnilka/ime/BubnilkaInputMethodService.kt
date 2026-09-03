@@ -2,15 +2,19 @@ package com.thebifel.bubnilka.ime
 
 import android.annotation.SuppressLint
 import android.inputmethodservice.InputMethodService
+import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.PopupMenu
+import android.widget.ScrollView
 import android.widget.TextView
 import com.thebifel.bubnilka.R
 import com.thebifel.bubnilka.cloud.CloudProviderFactory
 import com.thebifel.bubnilka.core.model.KeyboardFailure
 import com.thebifel.bubnilka.core.model.KeyboardState
+import com.thebifel.bubnilka.core.model.LanguageMode
 import com.thebifel.bubnilka.core.model.RecoveryAction
 import com.thebifel.bubnilka.core.model.StylePreset
 import com.thebifel.bubnilka.core.session.KeyboardSession
@@ -29,6 +33,10 @@ class BubnilkaInputMethodService : InputMethodService() {
     private var keyboardView: View? = null
     private val consentRepository: ConsentRepository by lazy { ConsentRepository.from(this) }
     private var cloudConsentAccepted: Boolean = false
+    private var includeFieldContext: Boolean = false
+    private var previewAutoFollow: Boolean = true
+    private var previewUserInteracting: Boolean = false
+    private var previewSessionId: Long? = null
 
     @SuppressLint("InflateParams") // InputMethodService does not expose a parent container here.
     override fun onCreateInputView(): View {
@@ -55,13 +63,15 @@ class BubnilkaInputMethodService : InputMethodService() {
         bindStyle(view, R.id.style_professional_button, StylePreset.PROFESSIONAL)
         bindStyle(view, R.id.style_friendly_button, StylePreset.FRIENDLY)
         bindStyle(view, R.id.style_viking_button, StylePreset.VIKING)
+        session.selectLanguageMode(loadLanguageMode())
+        configurePreviewScrolling(view.findViewById(R.id.transcript_scroll))
 
         view.findViewById<View>(R.id.microphone_button).setOnClickListener {
             if (!cloudConsentAccepted) return@setOnClickListener
             when (session.state) {
                 is KeyboardState.Listening -> voiceFlow?.cancel()
                 is KeyboardState.SensitiveField -> Unit
-                else -> voiceFlow?.start()
+                else -> voiceFlow?.start(includeFieldContext = includeFieldContext)
             }
         }
         view.findViewById<Button>(R.id.undo_button).setOnClickListener {
@@ -86,6 +96,7 @@ class BubnilkaInputMethodService : InputMethodService() {
         view.findViewById<View>(R.id.backspace_button).setOnClickListener {
             insertion.backspace()
         }
+        view.findViewById<View>(R.id.language_settings_button).setOnClickListener(::showLanguageMenu)
         applyEditorPolicy(currentInputEditorInfo)
         render(session.state)
         BubnilkaLog.state("keyboard_view_created")
@@ -111,6 +122,7 @@ class BubnilkaInputMethodService : InputMethodService() {
         cloudConsentAccepted = consentRepository.isAccepted()
         applyEditorPolicy(info)
         render(session.state)
+        keyboardView?.post(::startListeningWhenReady)
     }
 
     override fun onDestroy() {
@@ -129,6 +141,22 @@ class BubnilkaInputMethodService : InputMethodService() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private fun configurePreviewScrolling(scrollView: ScrollView) {
+        scrollView.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> previewUserInteracting = true
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL,
+                -> scrollView.post {
+                    previewUserInteracting = false
+                    previewAutoFollow = !scrollView.canScrollVertically(1)
+                }
+            }
+            false
+        }
+    }
+
     private fun applyEditorPolicy(editorInfo: EditorInfo?) {
         if (editorInfo != null && SensitiveFieldPolicy.isSensitive(editorInfo.inputType)) {
             speechProvider?.close()
@@ -142,6 +170,7 @@ class BubnilkaInputMethodService : InputMethodService() {
         val view = keyboardView ?: return
         val status = view.findViewById<TextView>(R.id.keyboard_status)
         val transcript = view.findViewById<TextView>(R.id.transcript_text)
+        val transcriptScroll = view.findViewById<ScrollView>(R.id.transcript_scroll)
         val microphone = view.findViewById<View>(R.id.microphone_button)
         val retry = view.findViewById<Button>(R.id.retry_button)
         val insertRaw = view.findViewById<Button>(R.id.insert_raw_button)
@@ -150,6 +179,14 @@ class BubnilkaInputMethodService : InputMethodService() {
         retry.visibility = View.GONE
         insertRaw.visibility = View.GONE
         recoveryActions.visibility = View.GONE
+
+        if (state is KeyboardState.Listening && previewSessionId != state.sessionId) {
+            previewSessionId = state.sessionId
+            previewAutoFollow = true
+        } else if (state is KeyboardState.Idle) {
+            previewSessionId = null
+            previewAutoFollow = true
+        }
 
         when (state) {
             is KeyboardState.Idle -> {
@@ -206,6 +243,24 @@ class BubnilkaInputMethodService : InputMethodService() {
         renderStyle(view, R.id.style_friendly_button, selectedStyle == StylePreset.FRIENDLY)
         renderStyle(view, R.id.style_viking_button, selectedStyle == StylePreset.VIKING)
 
+        transcriptScroll.post {
+            if (previewAutoFollow && !previewUserInteracting) {
+                transcriptScroll.fullScroll(View.FOCUS_DOWN)
+            }
+        }
+
+        view.findViewById<View>(R.id.language_settings_button).contentDescription = getString(
+            if (includeFieldContext) {
+                R.string.language_settings_selected_with_field
+            } else {
+                R.string.language_settings_selected
+            },
+            getString(languageModeTitle(session.selectedLanguageMode)),
+        )
+        microphone.contentDescription = getString(
+            if (state is KeyboardState.Listening) R.string.cancel_dictation else R.string.start_dictation,
+        )
+
         val mayEditInsertion = session.lastInsertion != null &&
             state !is KeyboardState.Transforming &&
             state !is KeyboardState.Listening &&
@@ -224,10 +279,88 @@ class BubnilkaInputMethodService : InputMethodService() {
     }
 
     private fun renderStyle(view: View, buttonId: Int, selected: Boolean) {
-        view.findViewById<Button>(buttonId).apply {
-            isSelected = selected
-            alpha = 1f
+        renderSelection(view, buttonId, selected)
+    }
+
+    private fun renderSelection(view: View, buttonId: Int, selected: Boolean) {
+        view.findViewById<Button>(buttonId).isSelected = selected
+    }
+
+    private fun startListeningWhenReady() {
+        if (!cloudConsentAccepted || session.state is KeyboardState.SensitiveField) return
+        if (session.state is KeyboardState.Listening || session.state is KeyboardState.Transforming) return
+        voiceFlow?.start(includeFieldContext = includeFieldContext)
+    }
+
+    private fun showLanguageMenu(anchor: View) {
+        PopupMenu(this, anchor).apply {
+            menu.add(LANGUAGE_GROUP, MENU_UKRAINIAN, 0, R.string.language_ukrainian)
+            menu.add(LANGUAGE_GROUP, MENU_ENGLISH, 1, R.string.language_english)
+            menu.add(LANGUAGE_GROUP, MENU_UK_TO_EN, 2, R.string.language_uk_to_en_full)
+            menu.add(LANGUAGE_GROUP, MENU_EN_TO_UK, 3, R.string.language_en_to_uk_full)
+            menu.setGroupCheckable(LANGUAGE_GROUP, true, true)
+            menu.findItem(menuId(session.selectedLanguageMode)).isChecked = true
+            menu.add(0, MENU_FIELD_CONTEXT, 4, R.string.field_context_menu).apply {
+                isCheckable = true
+                isChecked = includeFieldContext
+            }
+            setOnMenuItemClickListener { item ->
+                if (item.itemId == MENU_FIELD_CONTEXT) {
+                    updateFieldContext(!includeFieldContext)
+                    true
+                } else {
+                    languageMode(item.itemId)?.let(::updateLanguageMode) != null
+                }
+            }
+            show()
         }
+    }
+
+    private fun updateLanguageMode(languageMode: LanguageMode) {
+        val shouldStart = session.state !is KeyboardState.Transforming &&
+            session.state !is KeyboardState.SensitiveField
+        if (session.state is KeyboardState.Listening) voiceFlow?.cancel()
+        session.selectLanguageMode(languageMode)
+        getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE).edit()
+            .putString(KEY_LANGUAGE_MODE, languageMode.id)
+            .apply()
+        render(session.state)
+        if (shouldStart) startListeningWhenReady()
+    }
+
+    private fun updateFieldContext(enabled: Boolean) {
+        val shouldStart = session.state !is KeyboardState.Transforming &&
+            session.state !is KeyboardState.SensitiveField
+        if (session.state is KeyboardState.Listening) voiceFlow?.cancel()
+        includeFieldContext = enabled
+        render(session.state)
+        if (shouldStart) startListeningWhenReady()
+    }
+
+    private fun loadLanguageMode(): LanguageMode = LanguageMode.fromId(
+        getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE).getString(KEY_LANGUAGE_MODE, null),
+    ) ?: LanguageMode.default
+
+    private fun menuId(languageMode: LanguageMode): Int = when (languageMode) {
+        LanguageMode.UKRAINIAN -> MENU_UKRAINIAN
+        LanguageMode.ENGLISH -> MENU_ENGLISH
+        LanguageMode.UKRAINIAN_TO_ENGLISH -> MENU_UK_TO_EN
+        LanguageMode.ENGLISH_TO_UKRAINIAN -> MENU_EN_TO_UK
+    }
+
+    private fun languageMode(menuId: Int): LanguageMode? = when (menuId) {
+        MENU_UKRAINIAN -> LanguageMode.UKRAINIAN
+        MENU_ENGLISH -> LanguageMode.ENGLISH
+        MENU_UK_TO_EN -> LanguageMode.UKRAINIAN_TO_ENGLISH
+        MENU_EN_TO_UK -> LanguageMode.ENGLISH_TO_UKRAINIAN
+        else -> null
+    }
+
+    private fun languageModeTitle(languageMode: LanguageMode): Int = when (languageMode) {
+        LanguageMode.UKRAINIAN -> R.string.language_ukrainian
+        LanguageMode.ENGLISH -> R.string.language_english
+        LanguageMode.UKRAINIAN_TO_ENGLISH -> R.string.language_uk_to_en_full
+        LanguageMode.ENGLISH_TO_UKRAINIAN -> R.string.language_en_to_uk_full
     }
 
     private fun failureMessage(failure: KeyboardFailure): Int = when (failure) {
@@ -244,5 +377,16 @@ class BubnilkaInputMethodService : InputMethodService() {
         KeyboardFailure.RECOGNITION_ERROR,
         KeyboardFailure.UNEXPECTED,
         -> R.string.error_unexpected
+    }
+
+    private companion object {
+        const val PREFERENCES_NAME = "bubnilka_keyboard"
+        const val KEY_LANGUAGE_MODE = "language_mode"
+        const val LANGUAGE_GROUP = 1
+        const val MENU_UKRAINIAN = 101
+        const val MENU_ENGLISH = 102
+        const val MENU_UK_TO_EN = 103
+        const val MENU_EN_TO_UK = 104
+        const val MENU_FIELD_CONTEXT = 201
     }
 }

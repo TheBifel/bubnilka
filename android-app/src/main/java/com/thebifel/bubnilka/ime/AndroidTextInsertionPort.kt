@@ -1,6 +1,9 @@
 package com.thebifel.bubnilka.ime
 
 import android.view.inputmethod.InputConnection
+import android.view.inputmethod.ExtractedTextRequest
+import com.thebifel.bubnilka.core.model.MAX_FIELD_CONTEXT_LENGTH
+import com.thebifel.bubnilka.core.model.MAX_TRANSFORMED_LENGTH
 import com.thebifel.bubnilka.core.port.TextInsertionPort
 
 interface CursorConnection {
@@ -8,6 +11,8 @@ interface CursorConnection {
     fun commit(text: String): Boolean
     fun deleteBeforeCursor(characters: Int): Boolean
     fun backspace(): Boolean
+    fun allText(maxCharacters: Int): CharSequence?
+    fun replaceAll(expected: String, replacement: String): Boolean
 }
 
 class FrameworkCursorConnection(
@@ -27,6 +32,29 @@ class FrameworkCursorConnection(
             connection.deleteSurroundingTextInCodePoints(1, 0)
         } else {
             connection.commitText("", 1)
+        }
+    }
+
+    override fun allText(maxCharacters: Int): CharSequence? {
+        val request = ExtractedTextRequest().apply { hintMaxChars = maxCharacters }
+        val extracted = connection.getExtractedText(request, 0) ?: return null
+        if (extracted.startOffset != 0 ||
+            extracted.partialStartOffset >= 0 ||
+            extracted.partialEndOffset >= 0
+        ) {
+            return null
+        }
+        val text = extracted.text ?: return null
+        return text.takeIf { it.length <= maxCharacters }
+    }
+
+    override fun replaceAll(expected: String, replacement: String): Boolean {
+        if (allText(MAX_TRANSFORMED_LENGTH)?.toString() != expected) return false
+        connection.beginBatchEdit()
+        return try {
+            connection.setSelection(0, expected.length) && connection.commitText(replacement, 1)
+        } finally {
+            connection.endBatchEdit()
         }
     }
 }
@@ -62,5 +90,13 @@ class AndroidTextInsertionPort(
         val connection = connectionProvider() ?: return false
         if (connection.textBeforeCursor(previous.length)?.toString() != previous) return false
         return connection.deleteBeforeCursor(previous.length)
+    }
+
+    override fun readAllText(): String? =
+        connectionProvider()?.allText(MAX_FIELD_CONTEXT_LENGTH)?.toString()
+
+    override fun replaceAll(expected: String, replacement: String): Boolean {
+        if (expected.length > MAX_TRANSFORMED_LENGTH || replacement.length > MAX_TRANSFORMED_LENGTH) return false
+        return connectionProvider()?.replaceAll(expected, replacement) == true
     }
 }

@@ -64,65 +64,87 @@
         android:textColor="@color/bubnilka_muted"
         android:textSize="12sp" />
 
-    <TextView
-        android:id="@+id/transcript_text"
+    <ScrollView
+        android:id="@+id/transcript_scroll"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="78dp"
         android:layout_marginTop="5dp"
         android:background="@drawable/transcript_panel"
-        android:gravity="center_vertical"
-        android:maxLines="3"
-        android:paddingHorizontal="14dp"
-        android:paddingVertical="9dp"
-        android:text="@string/transcript_placeholder"
-        android:textColor="@color/bubnilka_text"
-        android:textSize="15sp" />
+        android:fadeScrollbars="false"
+        android:fillViewport="true"
+        android:overScrollMode="ifContentScrolls"
+        android:scrollbarStyle="insideInset"
+        android:scrollbars="vertical">
 
-    <LinearLayout
+        <TextView
+            android:id="@+id/transcript_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="78dp"
+            android:paddingStart="14dp"
+            android:paddingTop="9dp"
+            android:paddingEnd="18dp"
+            android:paddingBottom="9dp"
+            android:text="@string/transcript_placeholder"
+            android:textColor="@color/bubnilka_text"
+            android:textSize="15sp" />
+    </ScrollView>
+
+    <FrameLayout
         android:id="@+id/primary_actions"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:foregroundGravity="center_vertical">
 
-        <ImageButton
-            android:id="@+id/switch_keyboard_button"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:background="@drawable/utility_button"
-            android:contentDescription="@string/switch_keyboard"
-            android:padding="13dp"
-            android:src="@drawable/ic_keyboard" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start|center_vertical"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+            <ImageButton
+                android:id="@+id/switch_keyboard_button"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:background="@drawable/utility_button"
+                android:contentDescription="@string/switch_keyboard"
+                android:padding="13dp"
+                android:src="@drawable/ic_keyboard" />
+
+            <ImageButton
+                android:id="@+id/language_settings_button"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/utility_button"
+                android:contentDescription="@string/language_settings"
+                android:padding="13dp"
+                android:src="@drawable/ic_settings" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/microphone_button"
             android:layout_width="64dp"
             android:layout_height="64dp"
+            android:layout_gravity="center"
             android:background="@drawable/microphone_button"
             android:contentDescription="@string/start_dictation"
             android:padding="18dp"
             android:src="@drawable/ic_mic" />
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
         <ImageButton
             android:id="@+id/backspace_button"
             android:layout_width="52dp"
             android:layout_height="52dp"
+            android:layout_gravity="end|center_vertical"
             android:background="@drawable/utility_button"
             android:contentDescription="@string/backspace"
             android:padding="13dp"
             android:src="@drawable/ic_backspace" />
-    </LinearLayout>
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/recovery_actions"

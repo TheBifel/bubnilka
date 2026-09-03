@@ -3,18 +3,31 @@ package com.thebifel.bubnilka.core.session
 import com.thebifel.bubnilka.core.model.InsertionRecord
 import com.thebifel.bubnilka.core.model.KeyboardFailure
 import com.thebifel.bubnilka.core.model.KeyboardState
+import com.thebifel.bubnilka.core.model.LanguageMode
 import com.thebifel.bubnilka.core.model.MAX_TRANSCRIPT_LENGTH
 import com.thebifel.bubnilka.core.model.RecoveryAction
 import com.thebifel.bubnilka.core.model.StylePreset
 import com.thebifel.bubnilka.core.model.TransformationRequest
 import com.thebifel.bubnilka.core.model.TransformationResult
 
-class KeyboardSession(initialStyle: StylePreset = StylePreset.default) {
+class KeyboardSession(
+    initialStyle: StylePreset = StylePreset.default,
+    initialLanguageMode: LanguageMode = LanguageMode.default,
+) {
     var state: KeyboardState = KeyboardState.Idle(initialStyle)
         private set
 
     var selectedStyle: StylePreset = initialStyle
         private set
+
+    var selectedLanguageMode: LanguageMode = initialLanguageMode
+        private set
+
+    private var activeLanguageMode: LanguageMode = initialLanguageMode
+    private var activeExistingFieldText: String? = null
+
+    val activeSpeechLanguageTag: String
+        get() = activeLanguageMode.sourceLanguageTag
 
     var activeSessionId: Long = 0
         private set
@@ -22,8 +35,10 @@ class KeyboardSession(initialStyle: StylePreset = StylePreset.default) {
     var lastInsertion: InsertionRecord? = null
         private set
 
-    fun startListening(): Long {
+    fun startListening(existingFieldText: String? = null): Long {
         activeSessionId += 1
+        activeLanguageMode = selectedLanguageMode
+        activeExistingFieldText = existingFieldText
         state = KeyboardState.Listening(activeSessionId, "", selectedStyle)
         return activeSessionId
     }
@@ -46,6 +61,9 @@ class KeyboardSession(initialStyle: StylePreset = StylePreset.default) {
             sessionId = sessionId,
             rawTranscript = normalized,
             styleId = selectedStyle.id,
+            sourceLanguageTag = activeLanguageMode.sourceLanguageTag,
+            targetLanguageTag = activeLanguageMode.targetLanguageTag,
+            existingFieldText = activeExistingFieldText,
         )
         state = KeyboardState.Transforming(sessionId, normalized, selectedStyle)
         return request
@@ -66,6 +84,7 @@ class KeyboardSession(initialStyle: StylePreset = StylePreset.default) {
             rawTranscript = current.rawTranscript,
             insertedText = normalized,
             styleId = current.selectedStyle.id,
+            existingFieldText = activeExistingFieldText,
         )
         state = KeyboardState.Inserted(
             sessionId = current.sessionId,
@@ -102,6 +121,10 @@ class KeyboardSession(initialStyle: StylePreset = StylePreset.default) {
         }
     }
 
+    fun selectLanguageMode(languageMode: LanguageMode) {
+        selectedLanguageMode = languageMode
+    }
+
     fun beginRegeneration(): TransformationRequest? {
         val insertion = lastInsertion ?: return null
         activeSessionId += 1
@@ -109,7 +132,12 @@ class KeyboardSession(initialStyle: StylePreset = StylePreset.default) {
             sessionId = activeSessionId,
             rawTranscript = insertion.rawTranscript,
             styleId = selectedStyle.id,
+            sourceLanguageTag = selectedLanguageMode.sourceLanguageTag,
+            targetLanguageTag = selectedLanguageMode.targetLanguageTag,
+            existingFieldText = insertion.existingFieldText,
         )
+        activeLanguageMode = selectedLanguageMode
+        activeExistingFieldText = insertion.existingFieldText
         state = KeyboardState.Transforming(
             sessionId = request.sessionId,
             rawTranscript = request.rawTranscript,
@@ -126,6 +154,9 @@ class KeyboardSession(initialStyle: StylePreset = StylePreset.default) {
             sessionId = activeSessionId,
             rawTranscript = rawTranscript,
             styleId = selectedStyle.id,
+            sourceLanguageTag = activeLanguageMode.sourceLanguageTag,
+            targetLanguageTag = activeLanguageMode.targetLanguageTag,
+            existingFieldText = activeExistingFieldText,
         )
         state = KeyboardState.Transforming(
             sessionId = request.sessionId,
@@ -150,18 +181,21 @@ class KeyboardSession(initialStyle: StylePreset = StylePreset.default) {
             transformedText = rawTranscript,
             selectedStyle = selectedStyle,
         )
+        activeExistingFieldText = null
         return true
     }
 
     fun onUndoSucceeded() {
         invalidateActiveSession()
         lastInsertion = null
+        activeExistingFieldText = null
         state = KeyboardState.Idle(selectedStyle)
     }
 
     fun enterSensitiveField() {
         invalidateActiveSession()
         lastInsertion = null
+        activeExistingFieldText = null
         state = KeyboardState.SensitiveField
     }
 
@@ -174,6 +208,7 @@ class KeyboardSession(initialStyle: StylePreset = StylePreset.default) {
     fun reset() {
         invalidateActiveSession()
         lastInsertion = null
+        activeExistingFieldText = null
         state = KeyboardState.Idle(selectedStyle)
     }
 

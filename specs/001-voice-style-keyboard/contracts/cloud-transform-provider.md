@@ -2,17 +2,20 @@
 
 ## Purpose
 
-Transform one final dictated transcript into the selected style without adding facts or assistant
-commentary.
+Transform or translate one final dictated transcript into the selected style without adding facts
+or assistant commentary. Optionally merge it with explicitly supplied whole-field context.
 
 ## Input
 
 - Current session identifier
 - Trimmed final transcript, 1..2,000 characters
 - Known style identifier
-- Source language tag
+- Source and target language tags
+- Optional complete field snapshot (maximum 6,000 characters) and additional transcript as
+  separate untrusted data blocks
 
-The caller MUST NOT include surrounding field content or persisted history.
+The caller MUST NOT include field content unless the user selected Field + voice. It never includes
+persisted history.
 
 ## Output
 

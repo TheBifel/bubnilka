@@ -2,6 +2,7 @@ package com.thebifel.bubnilka.core.session
 
 import com.thebifel.bubnilka.core.model.KeyboardFailure
 import com.thebifel.bubnilka.core.model.KeyboardState
+import com.thebifel.bubnilka.core.model.InsertionRecord
 import com.thebifel.bubnilka.core.model.RecoveryAction
 import com.thebifel.bubnilka.core.model.TransformationRequest
 import com.thebifel.bubnilka.core.port.CloudTransformProvider
@@ -21,14 +22,15 @@ class VoiceFlow(
     private val scope: CoroutineScope,
     private val onStateChanged: (KeyboardState) -> Unit = {},
 ) {
-    fun start(languageTag: String = "uk-UA"): Long {
-        val sessionId = session.startListening()
+    fun start(includeFieldContext: Boolean = false): Long {
+        val existingFieldText = if (includeFieldContext) insertion.readAllText() ?: "" else null
+        val sessionId = session.startListening(existingFieldText)
         if (!speech.isAvailable) {
             session.fail(sessionId, KeyboardFailure.SPEECH_RECOGNITION_UNAVAILABLE)
             notifyState()
             return sessionId
         }
-        speech.start(sessionId, languageTag, ::handleSpeechEvent)
+        speech.start(sessionId, session.activeSpeechLanguageTag, ::handleSpeechEvent)
         notifyState()
         return sessionId
     }
@@ -56,7 +58,7 @@ class VoiceFlow(
                 val text = session.onTransformationResult(result)
                 if (text == null) {
                     session.fail(request.sessionId, KeyboardFailure.INVALID_CLOUD_RESPONSE, request.rawTranscript)
-                } else if (insertion.replace(previous.insertedText, text)) {
+                } else if (replacePrevious(previous, text)) {
                     session.onInserted(result)
                 } else {
                     session.fail(request.sessionId, KeyboardFailure.UNSAFE_REPLACEMENT, request.rawTranscript)
@@ -77,7 +79,11 @@ class VoiceFlow(
 
     fun undo(): Boolean {
         val previous = session.lastInsertion ?: return false
-        val succeeded = insertion.undo(previous.insertedText)
+        val succeeded = if (previous.existingFieldText == null) {
+            insertion.undo(previous.insertedText)
+        } else {
+            insertion.replaceAll(previous.insertedText, previous.existingFieldText)
+        }
         if (succeeded) {
             session.onUndoSucceeded()
         } else {
@@ -140,10 +146,18 @@ class VoiceFlow(
                 val text = session.onTransformationResult(result)
                 if (text == null) {
                     session.fail(request.sessionId, KeyboardFailure.INVALID_CLOUD_RESPONSE, request.rawTranscript)
-                } else if (insertion.insert(text)) {
+                } else if (insertTransformation(request, text)) {
                     session.onInserted(result)
                 } else {
-                    session.fail(request.sessionId, KeyboardFailure.UNEXPECTED, request.rawTranscript)
+                    session.fail(
+                        request.sessionId,
+                        if (request.existingFieldText == null) {
+                            KeyboardFailure.UNEXPECTED
+                        } else {
+                            KeyboardFailure.UNSAFE_REPLACEMENT
+                        },
+                        request.rawTranscript,
+                    )
                 }
             } catch (failure: CloudTransformException) {
                 session.fail(request.sessionId, failure.category, request.rawTranscript)
@@ -160,5 +174,21 @@ class VoiceFlow(
 
     private fun notifyState() {
         onStateChanged(session.state)
+    }
+
+    private fun insertTransformation(request: TransformationRequest, text: String): Boolean =
+        if (request.existingFieldText == null) {
+            insertion.insert(text)
+        } else {
+            insertion.replaceAll(request.existingFieldText, text)
+        }
+
+    private fun replacePrevious(
+        previous: InsertionRecord,
+        replacement: String,
+    ): Boolean = if (previous.existingFieldText == null) {
+        insertion.replace(previous.insertedText, replacement)
+    } else {
+        insertion.replaceAll(previous.insertedText, replacement)
     }
 }

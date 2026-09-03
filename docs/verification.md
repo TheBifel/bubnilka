@@ -61,3 +61,28 @@ Android Lint — 0 issues, debug APK зібрано; `compileReleaseKotlin` та
 - Розмір: 16 083 865 bytes.
 - SHA-256: `42e75b6229ba649087ea6d2aa4b3377c037b1e22221c4c1f0d58f58036ab2599`.
 - Published: `/tank/files/bubnilka-0.1.0-debug.apk`.
+
+## Bilingual/context gate — 2026-09-03 UTC
+
+Після додавання мовного меню, двостороннього перекладу, автоматичного слухання, scrollable preview
+і режиму «Поле + голос» повний `./scripts/verify.sh` успішний:
+
+- 26 KMP/JVM тестів пройшли, включно з обома напрямками перекладу, prompt isolation,
+  whole-field replacement, Undo і захистом від конкурентної зміни поля;
+- 19 Android unit tests пройшли, включно з exact full-field replacement через fake
+  `InputConnection`;
+- Android Lint: `No issues found`;
+- debug APK зібрано, `compileReleaseKotlin` і release manifest processing успішні.
+
+На Android 15 emulator перевірено автоматичний старт `speech_started_on_device`, persisted вибір
+мови, bounds/стани всіх action-кнопок і наявність `ScrollView` для transcript preview. Screenshot
+fallback підтвердив popup із `Українська`, `English`, `Українська → English`,
+`English → Українська` і `Поле + голос`. Емулятор без реального аудіовходу закономірно завершує
+диктовку помилкою `no speech`, тому end-to-end точність перекладу й Gemini latency лишаються
+device-only перевіркою.
+
+Фінальний APK цього проходу:
+
+- Розмір: 16 083 939 bytes.
+- SHA-256: `e857d6837ef7dd6c9fd07e48efd49ef6958ca54b02dc527aceead0c0b6e5ebd5`.
+- Published: `/tank/files/bubnilka-0.1.0-debug.apk`.

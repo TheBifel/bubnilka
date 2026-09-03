@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Produce partial and final text from one explicitly initiated recording session, preferring local
+Produce partial and final text from an automatically or explicitly initiated recording session,
+using the selected `uk-UA` or `en-US` source language and preferring local
 recognition without blocking the MVP on an absent offline model.
 
 ## Events
