@@ -5,6 +5,8 @@ import com.thebifel.bubnilka.core.model.TransformationResult
 import com.thebifel.bubnilka.core.model.KeyboardFailure
 
 interface CloudTransformProvider {
+    suspend fun warmUp() = Unit
+
     suspend fun transform(request: TransformationRequest): TransformationResult
 }
 

@@ -182,3 +182,35 @@ Final APK for this pass:
 - Size: 16 083 939 bytes.
 - SHA-256: `d4b520adf1040175e50442697da6e12077bffc49af19d6f059e1d35507c05141`.
 - Published: `/tank/files/bubnilka-0.1.0-debug.apk`.
+
+## Proactive Gemini warm-up — 2026-09-04 UTC
+
+The first supported listening session in an application process now starts one minimal,
+content-free Gemini request immediately and in parallel with speech recognition. The first dictated
+transformation awaits that attempt, making user content the next model call. Warm-up output is
+discarded; warm-up failure is isolated from the keyboard state and never prevents the normal user
+request or starts an automatic retry. This intentionally consumes one additional free-tier request
+per application process.
+
+Full verification succeeded:
+
+- 34 KMP/JVM tests passed, including immediate/once-only warm-up, strict request ordering, and
+  non-blocking warm-up failure;
+- 25 Android unit tests passed;
+- Android Lint: no issues;
+- debug APK, `compileReleaseKotlin`, and release manifest processing succeeded;
+- APK Signature Scheme v2 verified.
+
+The final APK was installed on the Android 15 emulator. Content-free Logcat events showed
+`gemini_warmup_started` at `20:52:47.924`, followed by `speech_started_on_device` at
+`20:52:48.045`, proving warm-up begins at listening startup. The emulator's unregistered cloud test
+context returned `ServerException` after 10,942 ms; the error remained diagnostic-only as required.
+This is lifecycle evidence, not a valid Firebase latency benchmark. Physical-device logs must compare
+`gemini_warmup`, `gemini_generate_first_user_process`, and
+`gemini_generate_repeat_user_process`.
+
+Final APK for this pass:
+
+- Size: 16 083 939 bytes.
+- SHA-256: `13e7a994da9278a71040ce6937994a54159a1a53b33dcbea6330f01b951ba00d`.
+- Published: `/tank/files/bubnilka-0.1.0-debug.apk`.

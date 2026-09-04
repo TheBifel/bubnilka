@@ -12,6 +12,8 @@ import com.thebifel.bubnilka.core.port.SpeechToTextProvider
 import com.thebifel.bubnilka.core.port.TextInsertionPort
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class VoiceFlow(
@@ -23,6 +25,8 @@ class VoiceFlow(
     private val onStateChanged: (KeyboardState) -> Unit = {},
     private val onAudioLevelChanged: (Float) -> Unit = {},
 ) {
+    private var warmUp: Deferred<Unit>? = null
+
     fun start(includeFieldContext: Boolean = true): Long {
         val existingFieldText = if (includeFieldContext) insertion.readAllText() else null
         if (includeFieldContext && existingFieldText == null) {
@@ -37,6 +41,7 @@ class VoiceFlow(
             notifyState()
             return sessionId
         }
+        ensureWarmUp()
         speech.start(sessionId, session.activeSpeechLanguageTag, ::handleSpeechEvent)
         notifyState()
         return sessionId
@@ -61,6 +66,7 @@ class VoiceFlow(
         notifyState()
         scope.launch {
             try {
+                awaitWarmUp()
                 val result = cloud.transform(request)
                 val text = session.onTransformationResult(result)
                 if (text == null) {
@@ -166,6 +172,7 @@ class VoiceFlow(
     private fun launchInitialTransformation(request: TransformationRequest) {
         scope.launch {
             try {
+                awaitWarmUp()
                 val result = cloud.transform(request)
                 val text = session.onTransformationResult(result)
                 if (text == null) {
@@ -198,6 +205,23 @@ class VoiceFlow(
 
     private fun notifyState() {
         onStateChanged(session.state)
+    }
+
+    private fun ensureWarmUp() {
+        if (warmUp != null) return
+        warmUp = scope.async {
+            try {
+                cloud.warmUp()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Throwable) {
+                // Warm-up is an optimization. The real request still gets its normal error handling.
+            }
+        }
+    }
+
+    private suspend fun awaitWarmUp() {
+        warmUp?.await()
     }
 
     private fun insertTransformation(request: TransformationRequest, text: String): Boolean =

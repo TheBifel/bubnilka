@@ -17,6 +17,16 @@ without adding facts or assistant commentary. By default, merge it with supplied
 The caller includes field content while the default «Combine with field» toggle is enabled. When
 disabled, only the transcript is included. It never includes persisted history.
 
+## Warm-up
+
+- The provider exposes a content-free warm-up operation that may issue one minimal generation.
+- Listening starts the warm-up immediately and in parallel with recognition.
+- The first user transformation waits until the warm-up attempt finishes, so it is the next model
+  call rather than a concurrent request.
+- Warm-up failure is diagnostic only and must not suppress or retry the real transformation.
+- Firebase limits warm-up to one attempt per application process; it consumes one additional
+  provider request but never contains field or dictated content.
+
 ## Output
 
 - Matching session identifier
@@ -33,4 +43,4 @@ disabled, only the transcript is included. It never includes persisted history.
 - Cancelled/stale request
 
 The provider performs no automatic retries. Cancellation must stop delivery to the session even if
-the underlying request completes later.
+the underlying request completes later. Warm-up response text is ignored.

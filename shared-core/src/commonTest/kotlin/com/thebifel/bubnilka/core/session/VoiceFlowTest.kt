@@ -9,8 +9,10 @@ import com.thebifel.bubnilka.core.port.CloudTransformProvider
 import com.thebifel.bubnilka.core.port.SpeechEvent
 import com.thebifel.bubnilka.core.port.SpeechToTextProvider
 import com.thebifel.bubnilka.core.port.TextInsertionPort
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,6 +22,46 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VoiceFlowTest {
+    @Test
+    fun startsOneWarmUpImmediatelyAndSendsDictationOnlyAfterItCompletes() = runTest {
+        val speech = FakeSpeechProvider()
+        val cloud = BlockingWarmUpCloud()
+        val flow = VoiceFlow(KeyboardSession(), speech, cloud, FakeInsertionPort(), this)
+
+        val firstSession = flow.start()
+        advanceUntilIdle()
+        assertEquals(1, cloud.warmUpCalls)
+        assertEquals(0, cloud.transformCalls)
+
+        speech.emit(SpeechEvent.Final(firstSession, "фінальний текст"))
+        runCurrent()
+        assertEquals(0, cloud.transformCalls)
+
+        cloud.warmUpCompleted.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(1, cloud.transformCalls)
+
+        flow.start()
+        advanceUntilIdle()
+        assertEquals(1, cloud.warmUpCalls)
+    }
+
+    @Test
+    fun warmUpFailureDoesNotBlockTheDictatedTransformation() = runTest {
+        val speech = FakeSpeechProvider()
+        val cloud = FailingWarmUpCloud()
+        val session = KeyboardSession()
+        val flow = VoiceFlow(session, speech, cloud, FakeInsertionPort(), this)
+
+        val sessionId = flow.start()
+        speech.emit(SpeechEvent.Final(sessionId, "фінальний текст"))
+        advanceUntilIdle()
+
+        assertEquals(1, cloud.warmUpCalls)
+        assertEquals(1, cloud.transformCalls)
+        assertIs<KeyboardState.Inserted>(session.state)
+    }
+
     @Test
     fun finalSpeechTransformsAndInsertsExactlyOnce() = runTest {
         val speech = FakeSpeechProvider()
@@ -197,6 +239,37 @@ class VoiceFlowTest {
                 styleId = request.styleId,
                 text = "Оформлено: ${request.rawTranscript}",
             )
+        }
+    }
+
+    private class BlockingWarmUpCloud : CloudTransformProvider {
+        val warmUpCompleted = CompletableDeferred<Unit>()
+        var warmUpCalls = 0
+        var transformCalls = 0
+
+        override suspend fun warmUp() {
+            warmUpCalls += 1
+            warmUpCompleted.await()
+        }
+
+        override suspend fun transform(request: TransformationRequest): TransformationResult {
+            transformCalls += 1
+            return TransformationResult(request.sessionId, request.styleId, request.rawTranscript)
+        }
+    }
+
+    private class FailingWarmUpCloud : CloudTransformProvider {
+        var warmUpCalls = 0
+        var transformCalls = 0
+
+        override suspend fun warmUp() {
+            warmUpCalls += 1
+            error("warm-up failed")
+        }
+
+        override suspend fun transform(request: TransformationRequest): TransformationResult {
+            transformCalls += 1
+            return TransformationResult(request.sessionId, request.styleId, request.rawTranscript)
         }
     }
 

@@ -34,8 +34,9 @@ Host artifact: `android-app/build/outputs/apk/debug/android-app-debug.apk` (gene
 ## Метрики першого проходу
 
 - Час від завершення мовлення до вставки: —
-- Firebase `gemini_generate_first_process` / `gemini_generate_repeat_process`: очікують
-  вимірювання новою збіркою; текст, prompt і response у лог не потрапляють
+- Firebase `gemini_warmup` / `gemini_generate_first_user_process` /
+  `gemini_generate_repeat_user_process`: очікують вимірювання новою збіркою; текст, prompt і
+  response у лог не потрапляють
 - Помилки локального STT: `isOnDeviceRecognitionAvailable=false`; реалізовано системний fallback
 - Несумісні застосунки або поля: —
 - Побажання до розміру клавіш/панелі: —

@@ -103,11 +103,14 @@
   defaults to `MINIMAL` thinking, so reducing thinking is not an available speed-up for this model.
   Current Gemini 3.x sampling controls are ignored, so temperature/top-p/top-k tuning is also not a
   valid latency or determinism fix.
-- **Decision**: Keep one real model request per user action—do not spend free-tier quota on a dummy
-  warm-up. Record the existing content-free `gemini_generate` timing plus
-  `gemini_generate_first_process` or `gemini_generate_repeat_process`, then decide from physical
-  device samples. If warm requests still miss the target, next candidates are shorter output
-  bounds or streaming for perceived latency.
+- **Updated decision after device feedback**: Issue one minimal content-free warm-up generation when
+  the first supported listening session starts in an application process. Run it concurrently with
+  speech recognition, but make the first dictated transformation await its completion so the user
+  request is the next model call. Ignore warm-up output and failure, never retry it automatically,
+  and accept the cost of one additional free-tier request per process. Record
+  `gemini_warmup`, `gemini_generate_first_user_process`, and
+  `gemini_generate_repeat_user_process` separately. If warmed user requests still miss the target,
+  next candidates are shorter output bounds or streaming for perceived latency.
 - **Sources**: [Firebase streaming](https://firebase.google.com/docs/ai-logic/generate-text),
   [Firebase latency troubleshooting](https://firebase.google.com/docs/ai-logic/faq-and-troubleshooting),
   [thinking configuration](https://firebase.google.com/docs/ai-logic/thinking),

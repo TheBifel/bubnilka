@@ -20,12 +20,31 @@ import java.util.concurrent.atomic.AtomicBoolean
 class FirebaseGeminiTransformProvider(
     private val model: GenerativeModel,
 ) : CloudTransformProvider {
+    override suspend fun warmUp() {
+        if (!warmUpAttemptedInProcess.compareAndSet(false, true)) return
+        val startedAt = SystemClock.elapsedRealtime()
+        BubnilkaLog.state("gemini_warmup_started")
+        try {
+            model.generateContent(WARM_UP_PROMPT)
+            BubnilkaLog.state("gemini_warmup_completed")
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Throwable) {
+            BubnilkaLog.failure("gemini_warmup", failure.javaClass.simpleName)
+        } finally {
+            BubnilkaLog.timing(
+                category = "gemini_warmup",
+                durationMillis = SystemClock.elapsedRealtime() - startedAt,
+            )
+        }
+    }
+
     override suspend fun transform(request: TransformationRequest): TransformationResult {
         val startedAt = SystemClock.elapsedRealtime()
         val requestPhase = if (hasGeneratedInProcess.compareAndSet(false, true)) {
-            "first_process"
+            "first_user_process"
         } else {
-            "repeat_process"
+            "repeat_user_process"
         }
         BubnilkaLog.state("gemini_generate_started")
         try {
@@ -56,6 +75,9 @@ class FirebaseGeminiTransformProvider(
     }
 
     companion object {
+        private const val WARM_UP_PROMPT =
+            "Підготуйся редагувати наступне повідомлення. Відповідай лише словом READY."
+        private val warmUpAttemptedInProcess = AtomicBoolean(false)
         private val hasGeneratedInProcess = AtomicBoolean(false)
 
         fun create(app: FirebaseApp, modelName: String): FirebaseGeminiTransformProvider {

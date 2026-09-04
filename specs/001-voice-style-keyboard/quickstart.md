@@ -61,11 +61,12 @@ allowlist and specification before changing the local model value.
 14. Capture three cloud timings (first call and two warm calls) without transcript content:
 
     ```sh
-    adb logcat -s Bubnilka | grep -E 'timing=gemini_generate_(first|repeat)_process'
+    adb logcat -s Bubnilka | grep -E 'timing=(gemini_warmup|gemini_generate_(first|repeat)_user_process)'
     ```
 
-    `first_process` is the first Gemini request since the app process started; later requests are
-    `repeat_process`. Restart the app process before another cold sample.
+    `gemini_warmup` is the content-free first request. `first_user_process` is the first dictated
+    transformation after it; later dictated requests are `repeat_user_process`. Restart the app
+    process before another cold sample. The warm-up consumes one additional free-tier request.
 
 15. Record observed latency, recognition accuracy, and app-specific limitations in the project
    feedback notes before claiming device verification.

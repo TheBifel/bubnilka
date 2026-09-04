@@ -276,6 +276,15 @@ field and confirm no voice or cloud action can begin.
 
 ---
 
+## Phase 15: Proactive Gemini Warm-up
+
+- [X] T076 Add a content-free cloud warm-up contract and start it once when first listening begins.
+- [X] T077 Serialize the first dictated transformation after warm-up while treating warm-up failure
+  as non-blocking, with shared orchestration tests.
+- [X] T078 Run full verification, install on the emulator, publish APK, commit, and push.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

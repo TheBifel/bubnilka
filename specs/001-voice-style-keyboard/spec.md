@@ -217,6 +217,9 @@ it to transform and insert only the new dictation at the cursor.
   listening state.
 - **FR-032**: Cloud timing diagnostics MUST distinguish the first Gemini request in an application
   process from repeat requests without logging field text, transcripts, prompts, or responses.
+- **FR-033**: When listening first starts in an application process, the cloud provider MUST begin
+  one content-free warm-up generation immediately; the first dictated transformation MUST wait for
+  that attempt to finish and MUST proceed normally if warm-up fails.
 
 ### Key Entities
 
