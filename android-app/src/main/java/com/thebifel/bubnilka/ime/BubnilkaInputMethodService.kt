@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.inputmethodservice.InputMethodService
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -30,13 +31,24 @@ class BubnilkaInputMethodService : InputMethodService() {
     private var session = KeyboardSession()
     private var voiceFlow: VoiceFlow? = null
     private var speechProvider: AndroidSpeechToTextProvider? = null
+    private var insertionPort: AndroidTextInsertionPort? = null
     private var keyboardView: View? = null
     private val consentRepository: ConsentRepository by lazy { ConsentRepository.from(this) }
     private var cloudConsentAccepted: Boolean = false
-    private var includeFieldContext: Boolean = false
+    private var includeFieldContext: Boolean = true
     private var previewAutoFollow: Boolean = true
     private var previewUserInteracting: Boolean = false
     private var previewSessionId: Long? = null
+    private var backspaceRepeatView: View? = null
+    private var backspaceRepeatCount: Int = 0
+    private val backspaceRepeatAction = object : Runnable {
+        override fun run() {
+            val view = backspaceRepeatView ?: return
+            insertionPort?.backspace()
+            backspaceRepeatCount += 1
+            view.postDelayed(this, backspaceRepeatDelay(backspaceRepeatCount))
+        }
+    }
 
     @SuppressLint("InflateParams") // InputMethodService does not expose a parent container here.
     override fun onCreateInputView(): View {
@@ -49,6 +61,7 @@ class BubnilkaInputMethodService : InputMethodService() {
         val insertion = AndroidTextInsertionPort {
             currentInputConnection?.let(::FrameworkCursorConnection)
         }
+        insertionPort = insertion
         voiceFlow = VoiceFlow(
             session = session,
             speech = speech,
@@ -64,6 +77,7 @@ class BubnilkaInputMethodService : InputMethodService() {
         bindStyle(view, R.id.style_friendly_button, StylePreset.FRIENDLY)
         bindStyle(view, R.id.style_viking_button, StylePreset.VIKING)
         session.selectLanguageMode(loadLanguageMode())
+        includeFieldContext = loadFieldContextPreference()
         configurePreviewScrolling(view.findViewById(R.id.transcript_scroll))
 
         view.findViewById<View>(R.id.microphone_button).setOnClickListener {
@@ -93,9 +107,7 @@ class BubnilkaInputMethodService : InputMethodService() {
                 getSystemService(InputMethodManager::class.java).showInputMethodPicker()
             }
         }
-        view.findViewById<View>(R.id.backspace_button).setOnClickListener {
-            insertion.backspace()
-        }
+        configureBackspace(view.findViewById(R.id.backspace_button))
         view.findViewById<View>(R.id.language_settings_button).setOnClickListener(::showLanguageMenu)
         applyEditorPolicy(currentInputEditorInfo)
         render(session.state)
@@ -111,6 +123,7 @@ class BubnilkaInputMethodService : InputMethodService() {
     }
 
     override fun onFinishInput() {
+        stopBackspaceRepeat()
         speechProvider?.close()
         session.reset()
         render(session.state)
@@ -126,12 +139,51 @@ class BubnilkaInputMethodService : InputMethodService() {
     }
 
     override fun onDestroy() {
+        stopBackspaceRepeat()
         voiceFlow?.close()
         speechProvider = null
+        insertionPort = null
         UiInspector.detach(keyboardView)
         keyboardView = null
         coroutineOwner.close()
         super.onDestroy()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun configureBackspace(button: View) {
+        button.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    stopBackspaceRepeat()
+                    backspaceRepeatView = view
+                    backspaceRepeatCount = 0
+                    view.isPressed = true
+                    insertionPort?.backspace()
+                    view.postDelayed(backspaceRepeatAction, ViewConfiguration.getLongPressTimeout().toLong())
+                }
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL,
+                -> {
+                    val clicked = event.actionMasked == MotionEvent.ACTION_UP
+                    stopBackspaceRepeat()
+                    view.isPressed = false
+                    if (clicked) view.performClick()
+                }
+            }
+            true
+        }
+    }
+
+    private fun stopBackspaceRepeat() {
+        backspaceRepeatView?.removeCallbacks(backspaceRepeatAction)
+        backspaceRepeatView = null
+        backspaceRepeatCount = 0
+    }
+
+    private fun backspaceRepeatDelay(repeatCount: Int): Long = when {
+        repeatCount < 4 -> 130L
+        repeatCount < 10 -> 90L
+        else -> 55L
     }
 
     private fun bindStyle(view: View, buttonId: Int, style: StylePreset) {
@@ -333,6 +385,9 @@ class BubnilkaInputMethodService : InputMethodService() {
             session.state !is KeyboardState.SensitiveField
         if (session.state is KeyboardState.Listening) voiceFlow?.cancel()
         includeFieldContext = enabled
+        getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE).edit()
+            .putBoolean(KEY_INCLUDE_FIELD_CONTEXT, enabled)
+            .apply()
         render(session.state)
         if (shouldStart) startListeningWhenReady()
     }
@@ -340,6 +395,9 @@ class BubnilkaInputMethodService : InputMethodService() {
     private fun loadLanguageMode(): LanguageMode = LanguageMode.fromId(
         getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE).getString(KEY_LANGUAGE_MODE, null),
     ) ?: LanguageMode.default
+
+    private fun loadFieldContextPreference(): Boolean =
+        getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE).getBoolean(KEY_INCLUDE_FIELD_CONTEXT, true)
 
     private fun menuId(languageMode: LanguageMode): Int = when (languageMode) {
         LanguageMode.UKRAINIAN -> MENU_UKRAINIAN
@@ -382,6 +440,7 @@ class BubnilkaInputMethodService : InputMethodService() {
     private companion object {
         const val PREFERENCES_NAME = "bubnilka_keyboard"
         const val KEY_LANGUAGE_MODE = "language_mode"
+        const val KEY_INCLUDE_FIELD_CONTEXT = "include_field_context"
         const val LANGUAGE_GROUP = 1
         const val MENU_UKRAINIAN = 101
         const val MENU_ENGLISH = 102

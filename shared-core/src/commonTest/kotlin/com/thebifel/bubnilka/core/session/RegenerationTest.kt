@@ -1,6 +1,5 @@
 package com.thebifel.bubnilka.core.session
 
-import com.thebifel.bubnilka.core.model.KeyboardFailure
 import com.thebifel.bubnilka.core.model.KeyboardState
 import com.thebifel.bubnilka.core.model.StylePreset
 import com.thebifel.bubnilka.core.model.TransformationRequest
@@ -39,7 +38,7 @@ class RegenerationTest {
     }
 
     @Test
-    fun refusesRegenerationWhenHostSuffixChanged() = runTest {
+    fun regenerationReplacesTheWholeFieldEvenWhenItChanged() = runTest {
         val insertion = RecordingInsertionPort()
         val session = insertedSession(insertion)
         val flow = VoiceFlow(session, ImmediateSpeech(), StyleEchoCloud(), insertion, this)
@@ -48,13 +47,12 @@ class RegenerationTest {
         assertTrue(flow.regenerate())
         advanceUntilIdle()
 
-        assertEquals("поле вже змінив користувач", insertion.content)
-        val failure = assertIs<KeyboardState.Failure>(session.state)
-        assertEquals(KeyboardFailure.UNSAFE_REPLACEMENT, failure.failure)
+        assertEquals("structured: сирий текст", insertion.content)
+        assertIs<KeyboardState.Inserted>(session.state)
     }
 
     @Test
-    fun undoDeletesOnlyExactLastInsertionAndClearsRecord() {
+    fun undoRestoresTheOriginalWholeFieldAndClearsRecord() {
         val insertion = RecordingInsertionPort()
         val session = insertedSession(insertion)
         val flow = VoiceFlow(session, ImmediateSpeech(), StyleEchoCloud(), insertion, kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined))
@@ -69,10 +67,10 @@ class RegenerationTest {
 
     private fun insertedSession(insertion: RecordingInsertionPort): KeyboardSession {
         val session = KeyboardSession()
-        val id = session.startListening()
+        val id = session.startListening(existingFieldText = "")
         session.onFinalTranscript(id, "сирий текст")
         val result = TransformationResult(id, StylePreset.STRUCTURED.id, "structured: сирий текст")
-        insertion.insert(result.text)
+        insertion.replaceAll(result.text)
         session.onInserted(result)
         return session
     }
@@ -111,6 +109,13 @@ class RegenerationTest {
         override fun undo(previous: String): Boolean {
             if (!matchesBeforeCursor(previous)) return false
             content = content.dropLast(previous.length)
+            return true
+        }
+
+        override fun readAllText(): String = content
+
+        override fun replaceAll(replacement: String): Boolean {
+            content = replacement
             return true
         }
     }

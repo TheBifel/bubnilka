@@ -86,3 +86,30 @@ device-only перевіркою.
 - Розмір: 16 083 939 bytes.
 - SHA-256: `e857d6837ef7dd6c9fd07e48efd49ef6958ca54b02dc527aceead0c0b6e5ebd5`.
 - Published: `/tank/files/bubnilka-0.1.0-debug.apk`.
+
+## Unified-field and modular Backspace gate — 2026-09-04 UTC
+
+Default whole-field mode тепер передає LLM весь snapshot поля разом із новою диктовкою та просить
+повернути один цілісний текст із природними пробілами й переходами. Результат безумовно замінює
+поточне поле; persisted-перемикач «Об’єднувати з полем» дозволяє повернутися до transcript-only
+вставки в курсор.
+
+Повний verification gate успішний:
+
+- 29 KMP/JVM тестів, включно з default whole-field, вимкненим transcript-only режимом і
+  коректним пробілом у raw fallback;
+- 23 Android unit tests, зокрема видалення слова, апострофа/дефіса, пунктуації та пробілів;
+- Android Lint: `No issues found`;
+- debug APK, `compileReleaseKotlin` і release manifest processing успішні;
+- APK Signature Scheme v2 перевірено.
+
+На Android 15 emulator короткі tap послідовно змінили `lo world%21 → lo world% → lo world → lo`,
+тобто видалили число як слово, один знак пунктуації та наступне слово. Long press за 1.5 секунди
+видалив шість слів і зупинився після release. Direct IME tree підтвердив default-on стан об’єднання
+з полем.
+
+Фінальний APK цього проходу:
+
+- Розмір: 16 083 939 bytes.
+- SHA-256: `93156d5aaba97c72b86d1341183061b9979a3d615a60fc24eecedb9f9ba6e4ae`.
+- Published: `/tank/files/bubnilka-0.1.0-debug.apk`.

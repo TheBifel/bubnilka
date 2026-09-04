@@ -24,7 +24,10 @@ class KeyboardSession(
         private set
 
     private var activeLanguageMode: LanguageMode = initialLanguageMode
-    private var activeExistingFieldText: String? = null
+    private var activeExistingFieldTextSnapshot: String? = null
+
+    val activeExistingFieldText: String?
+        get() = activeExistingFieldTextSnapshot
 
     val activeSpeechLanguageTag: String
         get() = activeLanguageMode.sourceLanguageTag
@@ -38,7 +41,7 @@ class KeyboardSession(
     fun startListening(existingFieldText: String? = null): Long {
         activeSessionId += 1
         activeLanguageMode = selectedLanguageMode
-        activeExistingFieldText = existingFieldText
+        activeExistingFieldTextSnapshot = existingFieldText
         state = KeyboardState.Listening(activeSessionId, "", selectedStyle)
         return activeSessionId
     }
@@ -63,7 +66,7 @@ class KeyboardSession(
             styleId = selectedStyle.id,
             sourceLanguageTag = activeLanguageMode.sourceLanguageTag,
             targetLanguageTag = activeLanguageMode.targetLanguageTag,
-            existingFieldText = activeExistingFieldText,
+            existingFieldText = activeExistingFieldTextSnapshot,
         )
         state = KeyboardState.Transforming(sessionId, normalized, selectedStyle)
         return request
@@ -84,7 +87,7 @@ class KeyboardSession(
             rawTranscript = current.rawTranscript,
             insertedText = normalized,
             styleId = current.selectedStyle.id,
-            existingFieldText = activeExistingFieldText,
+            existingFieldText = activeExistingFieldTextSnapshot,
         )
         state = KeyboardState.Inserted(
             sessionId = current.sessionId,
@@ -137,7 +140,7 @@ class KeyboardSession(
             existingFieldText = insertion.existingFieldText,
         )
         activeLanguageMode = selectedLanguageMode
-        activeExistingFieldText = insertion.existingFieldText
+        activeExistingFieldTextSnapshot = insertion.existingFieldText
         state = KeyboardState.Transforming(
             sessionId = request.sessionId,
             rawTranscript = request.rawTranscript,
@@ -156,7 +159,7 @@ class KeyboardSession(
             styleId = selectedStyle.id,
             sourceLanguageTag = activeLanguageMode.sourceLanguageTag,
             targetLanguageTag = activeLanguageMode.targetLanguageTag,
-            existingFieldText = activeExistingFieldText,
+            existingFieldText = activeExistingFieldTextSnapshot,
         )
         state = KeyboardState.Transforming(
             sessionId = request.sessionId,
@@ -166,36 +169,36 @@ class KeyboardSession(
         return request
     }
 
-    fun onRawInserted(rawTranscript: String): Boolean {
+    fun onRawInserted(rawTranscript: String, completeText: String = rawTranscript): Boolean {
         val current = state as? KeyboardState.Failure ?: return false
         if (current.rawTranscript != rawTranscript || rawTranscript.isBlank()) return false
         lastInsertion = InsertionRecord(
             sessionId = activeSessionId,
             rawTranscript = rawTranscript,
-            insertedText = rawTranscript,
+            insertedText = completeText,
             styleId = selectedStyle.id,
+            existingFieldText = activeExistingFieldTextSnapshot,
         )
         state = KeyboardState.Inserted(
             sessionId = activeSessionId,
             rawTranscript = rawTranscript,
-            transformedText = rawTranscript,
+            transformedText = completeText,
             selectedStyle = selectedStyle,
         )
-        activeExistingFieldText = null
         return true
     }
 
     fun onUndoSucceeded() {
         invalidateActiveSession()
         lastInsertion = null
-        activeExistingFieldText = null
+        activeExistingFieldTextSnapshot = null
         state = KeyboardState.Idle(selectedStyle)
     }
 
     fun enterSensitiveField() {
         invalidateActiveSession()
         lastInsertion = null
-        activeExistingFieldText = null
+        activeExistingFieldTextSnapshot = null
         state = KeyboardState.SensitiveField
     }
 
@@ -208,7 +211,7 @@ class KeyboardSession(
     fun reset() {
         invalidateActiveSession()
         lastInsertion = null
-        activeExistingFieldText = null
+        activeExistingFieldTextSnapshot = null
         state = KeyboardState.Idle(selectedStyle)
     }
 

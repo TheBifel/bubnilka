@@ -35,8 +35,10 @@ class VoiceFlowTest {
         speech.emit(SpeechEvent.Final(sessionId, "  фінальний текст  "))
         advanceUntilIdle()
 
-        assertEquals("Оформлено: фінальний текст", insertion.inserted)
-        assertEquals(1, insertion.insertCalls)
+        assertEquals("Оформлено: фінальний текст", insertion.content)
+        assertEquals("", cloud.lastRequest?.existingFieldText)
+        assertEquals(0, insertion.insertCalls)
+        assertEquals(1, insertion.replaceAllCalls)
         assertIs<KeyboardState.Inserted>(session.state)
     }
 
@@ -72,13 +74,30 @@ class VoiceFlowTest {
     }
 
     @Test
+    fun disabledFieldCombinationTransformsOnlyDictationAndInsertsAtCursor() = runTest {
+        val speech = FakeSpeechProvider()
+        val cloud = FakeCloudProvider()
+        val insertion = FakeInsertionPort().apply { content = "Наявний текст " }
+        val flow = VoiceFlow(KeyboardSession(), speech, cloud, insertion, this)
+
+        val sessionId = flow.start(includeFieldContext = false)
+        speech.emit(SpeechEvent.Final(sessionId, "нове речення"))
+        advanceUntilIdle()
+
+        assertNull(cloud.lastRequest?.existingFieldText)
+        assertEquals(1, insertion.insertCalls)
+        assertEquals(0, insertion.replaceAllCalls)
+        assertEquals("Наявний текст Оформлено: нове речення", insertion.content)
+    }
+
+    @Test
     fun wholeFieldModeSendsContextAndSafelyReplacesEntireEditor() = runTest {
         val speech = FakeSpeechProvider()
         val cloud = FakeCloudProvider()
         val insertion = FakeInsertionPort().apply { content = "Перший абзац." }
         val flow = VoiceFlow(KeyboardSession(), speech, cloud, insertion, this)
 
-        val sessionId = flow.start(includeFieldContext = true)
+        val sessionId = flow.start()
         speech.emit(SpeechEvent.Final(sessionId, "Додай другий абзац."))
         advanceUntilIdle()
 
@@ -91,18 +110,34 @@ class VoiceFlowTest {
     }
 
     @Test
-    fun wholeFieldModeRefusesToOverwriteConcurrentUserEdit() = runTest {
+    fun wholeFieldModeReplacesConcurrentEditorChangesWithUnifiedResult() = runTest {
         val speech = FakeSpeechProvider()
         val insertion = FakeInsertionPort().apply { content = "Початковий текст" }
         val session = KeyboardSession()
         val flow = VoiceFlow(session, speech, FakeCloudProvider(), insertion, this)
 
-        val sessionId = flow.start(includeFieldContext = true)
+        val sessionId = flow.start()
         speech.emit(SpeechEvent.Final(sessionId, "Доповнення"))
         insertion.content = "Користувач уже змінив поле"
         advanceUntilIdle()
 
-        assertEquals("Користувач уже змінив поле", insertion.content)
+        assertEquals("Оформлено: Доповнення", insertion.content)
+        assertIs<KeyboardState.Inserted>(session.state)
+    }
+
+    @Test
+    fun unavailableWholeFieldPreventsRecognitionAndCloudWork() = runTest {
+        val speech = FakeSpeechProvider()
+        val cloud = FakeCloudProvider()
+        val insertion = FakeInsertionPort().apply { canReadAllText = false }
+        val session = KeyboardSession()
+        val flow = VoiceFlow(session, speech, cloud, insertion, this)
+
+        flow.start()
+        advanceUntilIdle()
+
+        assertEquals(0, speech.startCalls)
+        assertEquals(0, cloud.calls)
         assertEquals(KeyboardFailure.UNSAFE_REPLACEMENT, assertIs<KeyboardState.Failure>(session.state).failure)
     }
 
@@ -149,6 +184,7 @@ class VoiceFlowTest {
         var content: String = ""
         var insertCalls: Int = 0
         var replaceAllCalls: Int = 0
+        var canReadAllText: Boolean = true
 
         override fun insert(text: String): Boolean {
             inserted = text
@@ -161,10 +197,9 @@ class VoiceFlowTest {
         override fun replace(previous: String, replacement: String): Boolean = false
         override fun undo(previous: String): Boolean = false
 
-        override fun readAllText(): String = content
+        override fun readAllText(): String? = content.takeIf { canReadAllText }
 
-        override fun replaceAll(expected: String, replacement: String): Boolean {
-            if (content != expected) return false
+        override fun replaceAll(replacement: String): Boolean {
             content = replacement
             replaceAllCalls += 1
             return true

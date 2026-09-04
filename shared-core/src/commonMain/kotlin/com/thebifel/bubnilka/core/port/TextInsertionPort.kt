@@ -11,5 +11,5 @@ interface TextInsertionPort {
 
     fun readAllText(): String? = null
 
-    fun replaceAll(expected: String, replacement: String): Boolean = false
+    fun replaceAll(replacement: String): Boolean = false
 }

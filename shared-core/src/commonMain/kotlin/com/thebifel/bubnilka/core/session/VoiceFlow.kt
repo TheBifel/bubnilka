@@ -22,8 +22,14 @@ class VoiceFlow(
     private val scope: CoroutineScope,
     private val onStateChanged: (KeyboardState) -> Unit = {},
 ) {
-    fun start(includeFieldContext: Boolean = false): Long {
-        val existingFieldText = if (includeFieldContext) insertion.readAllText() ?: "" else null
+    fun start(includeFieldContext: Boolean = true): Long {
+        val existingFieldText = if (includeFieldContext) insertion.readAllText() else null
+        if (includeFieldContext && existingFieldText == null) {
+            val sessionId = session.startListening("")
+            session.fail(sessionId, KeyboardFailure.UNSAFE_REPLACEMENT)
+            notifyState()
+            return sessionId
+        }
         val sessionId = session.startListening(existingFieldText)
         if (!speech.isAvailable) {
             session.fail(sessionId, KeyboardFailure.SPEECH_RECOGNITION_UNAVAILABLE)
@@ -82,7 +88,7 @@ class VoiceFlow(
         val succeeded = if (previous.existingFieldText == null) {
             insertion.undo(previous.insertedText)
         } else {
-            insertion.replaceAll(previous.insertedText, previous.existingFieldText)
+            insertion.replaceAll(previous.existingFieldText)
         }
         if (succeeded) {
             session.onUndoSucceeded()
@@ -110,9 +116,19 @@ class VoiceFlow(
         val failure = session.state as? KeyboardState.Failure ?: return false
         val rawTranscript = failure.rawTranscript ?: return false
         if (RecoveryAction.INSERT_RAW !in failure.actions) return false
-        val succeeded = insertion.insert(rawTranscript)
+        val existingFieldText = session.activeExistingFieldText
+        val completeText = if (existingFieldText == null) {
+            rawTranscript
+        } else {
+            concatenate(existingFieldText, rawTranscript)
+        }
+        val succeeded = if (existingFieldText == null) {
+            insertion.insert(completeText)
+        } else {
+            insertion.replaceAll(completeText)
+        }
         if (succeeded) {
-            session.onRawInserted(rawTranscript)
+            session.onRawInserted(rawTranscript, completeText)
         } else {
             session.fail(session.activeSessionId, KeyboardFailure.UNEXPECTED, rawTranscript)
         }
@@ -180,7 +196,7 @@ class VoiceFlow(
         if (request.existingFieldText == null) {
             insertion.insert(text)
         } else {
-            insertion.replaceAll(request.existingFieldText, text)
+            insertion.replaceAll(text)
         }
 
     private fun replacePrevious(
@@ -189,6 +205,12 @@ class VoiceFlow(
     ): Boolean = if (previous.existingFieldText == null) {
         insertion.replace(previous.insertedText, replacement)
     } else {
-        insertion.replaceAll(previous.insertedText, replacement)
+        insertion.replaceAll(replacement)
+    }
+
+    private fun concatenate(existing: String, additional: String): String = when {
+        existing.isBlank() -> additional
+        existing.last().isWhitespace() -> existing + additional
+        else -> "$existing $additional"
     }
 }

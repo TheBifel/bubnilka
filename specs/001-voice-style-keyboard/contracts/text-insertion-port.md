@@ -12,11 +12,12 @@ Isolate host-field interaction from shared keyboard workflow logic.
 - `replace(previous, replacement)`: replace only when `matchesBeforeCursor(previous)` is true.
 - `undo(previous)`: delete only when `matchesBeforeCursor(previous)` is true.
 - `readAllText()`: return a bounded snapshot only when the editor exposes its complete text.
-- `replaceAll(expected, replacement)`: replace the entire editor only when its current text exactly
-  matches `expected`.
+- `replaceAll(replacement)`: select the entire current editor and replace it with the unified cloud
+  result. Whole-field mode deliberately does not compare against the earlier snapshot.
 
 ## Safety
 
-No delete or replacement operation may proceed after a connection/field change or when the exact
-suffix cannot be obtained. Failure is reported without modifying host text.
-Whole-field replacement has the same exact-match rule and restores the original snapshot on Undo.
+Suffix replacement used when field combination is disabled still requires an exact suffix match.
+Whole-field mode is intentionally unconditional: edits made while the cloud request is pending can
+be overwritten. A failed editor operation returns `false`; Undo in whole-field mode restores the
+captured pre-dictation snapshot by replacing the whole current editor.

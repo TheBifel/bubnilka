@@ -45,16 +45,15 @@ class AndroidTextInsertionPortTest {
     }
 
     @Test
-    fun readsAndReplacesTheEntireFieldOnlyWhenUnchanged() {
+    fun readsAndAlwaysReplacesTheEntireCurrentField() {
         val connection = FakeCursorConnection("Поточний текст")
         val port = AndroidTextInsertionPort { connection }
 
         assertEquals("Поточний текст", port.readAllText())
-        assertFalse(port.replaceAll("Інший текст", "Результат"))
-        assertEquals("Поточний текст", connection.content)
-        assertTrue(port.replaceAll("Поточний текст", "Повний результат"))
+        connection.content = "Користувач змінив поле під час запиту"
+        assertTrue(port.replaceAll("Повний результат"))
         assertEquals("Повний результат", connection.content)
-        assertTrue(port.replaceAll("Повний результат", ""))
+        assertTrue(port.replaceAll(""))
         assertEquals("", connection.content)
     }
 
@@ -85,8 +84,7 @@ class AndroidTextInsertionPortTest {
         override fun allText(maxCharacters: Int): CharSequence? =
             content.takeIf { it.length <= maxCharacters }
 
-        override fun replaceAll(expected: String, replacement: String): Boolean {
-            if (content != expected) return false
+        override fun replaceAll(replacement: String): Boolean {
             content = replacement
             return true
         }

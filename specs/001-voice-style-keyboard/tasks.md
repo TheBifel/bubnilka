@@ -238,6 +238,18 @@ field and confirm no voice or cloud action can begin.
 
 ---
 
+## Phase 12: Default Unified Field Regeneration
+
+- [X] T061 Enable whole-field combination by default and persist its gear-menu toggle.
+- [X] T062 In combined mode, prompt for coherent concatenation with natural spacing and replace the
+  complete current editor without an exact-match guard.
+- [X] T063 Keep transcript-only cloud transformation and cursor insertion when combination is off.
+- [X] T064 Add token-aware Backspace deletion for words, punctuation, whitespace, and selections.
+- [X] T065 Add accelerating Backspace long-press repeat with immediate release cancellation.
+- [X] T066 Run full verification, emulator smoke tests, publish APK, commit, and push.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

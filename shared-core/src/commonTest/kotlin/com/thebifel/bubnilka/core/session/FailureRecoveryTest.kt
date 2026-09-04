@@ -85,6 +85,23 @@ class FailureRecoveryTest {
         assertIs<KeyboardState.Inserted>(session.state)
     }
 
+    @Test
+    fun rawFallbackAddsASeparatorInCombinedMode() = runTest {
+        val speech = EmittingSpeech()
+        val cloud = QueueCloud().apply {
+            outcomes += Result.failure(CloudTransformException(KeyboardFailure.NETWORK_UNAVAILABLE))
+        }
+        val insertion = MemoryInsertion().apply { content = "Вже є речення." }
+        val flow = VoiceFlow(KeyboardSession(), speech, cloud, insertion, this)
+
+        val id = flow.start()
+        speech.emit(SpeechEvent.Final(id, "Нове речення."))
+        advanceUntilIdle()
+        assertTrue(flow.insertRaw())
+
+        assertEquals("Вже є речення. Нове речення.", insertion.content)
+    }
+
     private class EmittingSpeech : SpeechToTextProvider {
         private var listener: ((SpeechEvent) -> Unit)? = null
         var startCalls = 0
@@ -114,5 +131,7 @@ class FailureRecoveryTest {
         override fun matchesBeforeCursor(text: String) = content.endsWith(text)
         override fun replace(previous: String, replacement: String): Boolean = false
         override fun undo(previous: String): Boolean = false
+        override fun readAllText(): String = content
+        override fun replaceAll(replacement: String): Boolean { content = replacement; return true }
     }
 }

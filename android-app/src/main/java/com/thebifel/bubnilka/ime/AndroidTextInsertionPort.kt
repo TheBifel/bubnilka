@@ -12,7 +12,7 @@ interface CursorConnection {
     fun deleteBeforeCursor(characters: Int): Boolean
     fun backspace(): Boolean
     fun allText(maxCharacters: Int): CharSequence?
-    fun replaceAll(expected: String, replacement: String): Boolean
+    fun replaceAll(replacement: String): Boolean
 }
 
 class FrameworkCursorConnection(
@@ -29,7 +29,10 @@ class FrameworkCursorConnection(
     override fun backspace(): Boolean {
         val selectedText = connection.getSelectedText(0)
         return if (selectedText.isNullOrEmpty()) {
-            connection.deleteSurroundingTextInCodePoints(1, 0)
+            val beforeCursor = connection.getTextBeforeCursor(BACKSPACE_LOOKBACK_CODE_POINTS, 0)
+                ?: return false
+            val codePointCount = BackspaceDeletion.codePointCount(beforeCursor)
+            codePointCount > 0 && connection.deleteSurroundingTextInCodePoints(codePointCount, 0)
         } else {
             connection.commitText("", 1)
         }
@@ -48,14 +51,18 @@ class FrameworkCursorConnection(
         return text.takeIf { it.length <= maxCharacters }
     }
 
-    override fun replaceAll(expected: String, replacement: String): Boolean {
-        if (allText(MAX_TRANSFORMED_LENGTH)?.toString() != expected) return false
+    override fun replaceAll(replacement: String): Boolean {
+        val currentLength = allText(MAX_TRANSFORMED_LENGTH)?.length ?: return false
         connection.beginBatchEdit()
         return try {
-            connection.setSelection(0, expected.length) && connection.commitText(replacement, 1)
+            connection.setSelection(0, currentLength) && connection.commitText(replacement, 1)
         } finally {
             connection.endBatchEdit()
         }
+    }
+
+    private companion object {
+        const val BACKSPACE_LOOKBACK_CODE_POINTS = 256
     }
 }
 
@@ -95,8 +102,8 @@ class AndroidTextInsertionPort(
     override fun readAllText(): String? =
         connectionProvider()?.allText(MAX_FIELD_CONTEXT_LENGTH)?.toString()
 
-    override fun replaceAll(expected: String, replacement: String): Boolean {
-        if (expected.length > MAX_TRANSFORMED_LENGTH || replacement.length > MAX_TRANSFORMED_LENGTH) return false
-        return connectionProvider()?.replaceAll(expected, replacement) == true
+    override fun replaceAll(replacement: String): Boolean {
+        if (replacement.length > MAX_TRANSFORMED_LENGTH) return false
+        return connectionProvider()?.replaceAll(replacement) == true
     }
 }

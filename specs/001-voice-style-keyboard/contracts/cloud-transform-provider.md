@@ -3,7 +3,7 @@
 ## Purpose
 
 Transform or translate one final dictated transcript into the selected style without adding facts
-or assistant commentary. Optionally merge it with explicitly supplied whole-field context.
+or assistant commentary. By default, merge it with supplied whole-field context.
 
 ## Input
 
@@ -11,11 +11,11 @@ or assistant commentary. Optionally merge it with explicitly supplied whole-fiel
 - Trimmed final transcript, 1..2,000 characters
 - Known style identifier
 - Source and target language tags
-- Optional complete field snapshot (maximum 6,000 characters) and additional transcript as
-  separate untrusted data blocks
+- Complete field snapshot by default (maximum 6,000 characters) and additional transcript as
+  separate untrusted data blocks; the user can disable field combination
 
-The caller MUST NOT include field content unless the user selected Field + voice. It never includes
-persisted history.
+The caller includes field content while the default «Combine with field» toggle is enabled. When
+disabled, only the transcript is included. It never includes persisted history.
 
 ## Output
 

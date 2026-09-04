@@ -33,29 +33,32 @@ allowlist and specification before changing the local model value.
 ## Device smoke test
 
 1. Install `android-app/build/outputs/apk/debug/android-app-debug.apk`.
-2. Open Bubnilka and accept disclosure version 3 covering automatic listening, system-recognizer
-   fallback, Gemini processing/translation, and explicit whole-field context. Earlier acceptance
+2. Open Bubnilka and accept disclosure version 4 covering automatic listening, system-recognizer
+   fallback, Gemini processing/translation, and default whole-field context. Earlier acceptance
    is intentionally invalidated.
 3. Use the provided system buttons to enable and select Bubnilka.
 4. Focus a normal text field in Notes, Telegram, a browser, Gmail, and one additional app.
 5. Open a field and verify listening starts automatically. Select Structured, dictate a Ukrainian
    sentence, and verify wording is preserved while light structure is added.
 6. Use the gear popup to test EN, UA→EN, and EN→UA, then exercise Undo and Regenerate.
-7. Enable Field + voice, add dictation to existing editor text, and verify the entire result is
-   safely replaced; modify the field during a request and verify replacement is refused.
-8. Manually scroll a long live preview upward, verify new partial text does not force it down, then
+7. With Combine with field enabled by default, add dictation to existing editor text and verify
+   Gemini returns one coherent result with correct spacing and the entire field is replaced. Change
+   the field during the request and verify the cloud result still replaces its complete contents.
+8. Disable Combine with field and verify the next transformed dictation is simply inserted at the
+   cursor without sending the surrounding field.
+9. Manually scroll a long live preview upward, verify new partial text does not force it down, then
    return to the bottom and verify auto-follow resumes.
-9. Disable networking, dictate again, and verify Retry plus Insert raw are offered.
-10. Focus a password field and verify voice/cloud controls are unavailable.
-11. Tap Backspace after insertion and verify it removes the selection or previous character without
-   opening another keyboard.
-12. Capture three cloud timings (first call and two warm calls) without transcript content:
+10. Disable networking, dictate again, and verify Retry plus Insert raw are offered.
+11. Focus a password field and verify voice/cloud controls are unavailable.
+12. Tap Backspace and verify it removes one word or punctuation mark; hold it and verify deletion
+   repeats, accelerates, and stops immediately on release without opening another keyboard.
+13. Capture three cloud timings (first call and two warm calls) without transcript content:
 
     ```sh
     adb logcat -s Bubnilka | grep 'timing=gemini_generate'
     ```
 
-13. Record observed latency, recognition accuracy, and app-specific limitations in the project
+14. Record observed latency, recognition accuracy, and app-specific limitations in the project
    feedback notes before claiming device verification.
 
 If Ukrainian on-device recognition is missing, the first dictation should use the system recognizer.

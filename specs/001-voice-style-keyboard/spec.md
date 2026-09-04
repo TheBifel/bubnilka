@@ -112,8 +112,9 @@ and secure fields without examining implementation details.
 ### User Story 5 - Select Language, Translate, and Extend a Field (Priority: P2)
 
 The user opens a gear menu to select Ukrainian, English, Ukrainian-to-English, or
-English-to-Ukrainian. An explicit Field + voice option combines a snapshot of the entire editor
-with new dictation and replaces the whole field only if it is still unchanged.
+English-to-Ukrainian. Combine with field is enabled by default: it gives the complete editor and
+new dictation to the model, which returns one coherent text that replaces the entire field. The
+user can disable it to transform and insert only the new dictation at the cursor.
 
 **Acceptance Scenarios**:
 
@@ -121,11 +122,13 @@ with new dictation and replaces the whole field only if it is still unchanged.
    English and retains every name, number, fact, nuance, and intent.
 2. **Given** EN→UA is selected, **When** English speech is recognized, **Then** the result is
    Ukrainian with the same meaning.
-3. **Given** Field + voice is enabled, **When** dictation completes, **Then** the complete field and
-   additional transcript are sent as separate untrusted data sections and the returned complete
-   text safely replaces the field.
-4. **Given** the host field changes after its snapshot, **When** the result arrives, **Then** no
-   replacement occurs and an unsafe-replacement failure is shown.
+3. **Given** Combine with field is enabled, **When** dictation completes, **Then** the complete field
+   and additional transcript are sent as separate untrusted data sections and the model returns one
+   coherent text with natural whitespace and transitions.
+4. **Given** the host field changes after its snapshot, **When** the unified result arrives,
+   **Then** it replaces the complete current editor without an exact-match check.
+5. **Given** Combine with field is disabled, **When** dictation completes, **Then** no surrounding
+   field text is sent and the transformed dictation is inserted at the cursor.
 
 ### Edge Cases
 
@@ -136,7 +139,7 @@ with new dictation and replaces the whole field only if it is still unchanged.
 - The transformed result contains leading commentary instead of only the requested text.
 - The host application closes, changes selection, or changes fields before the result arrives.
 - A transcript is longer than the cloud request limit.
-- Field + voice is selected for an editor that cannot expose complete extracted text or exceeds
+- Field combination is enabled for an editor that cannot expose complete extracted text or exceeds
   the 6,000-character context limit.
 - The user taps the microphone or regenerate button repeatedly while work is already active.
 - The selected style changes while an earlier request is still running.
@@ -193,8 +196,16 @@ with new dictation and replaces the whole field only if it is still unchanged.
   MUST allow manual scrolling; auto-follow pauses while the user remains scrolled upward.
 - **FR-024**: Structured MUST preserve the author's wording, tone, length, and order, applying only
   punctuation, paragraphs, and numbering/list markers already implied by the content.
-- **FR-025**: Field + voice MUST be explicit, MUST disclose complete field upload, and MUST replace
-  the whole editor only after an exact unchanged-text check.
+- **FR-025**: Combine with field MUST default to enabled, persist the user's toggle, and disclose
+  complete field upload and unconditional whole-editor replacement.
+- **FR-026**: In combined mode the prompt MUST ask the model to retain already suitable field text
+  or format the field and dictation as one coherent result with natural whitespace and transitions.
+- **FR-027**: When combined mode is disabled, the request MUST omit surrounding field content and
+  insert only the transformed new dictation at the cursor.
+- **FR-028**: A Backspace tap MUST delete a selection, one preceding word, or one punctuation mark;
+  trailing whitespace belongs to the deleted module.
+- **FR-029**: Holding Backspace MUST repeat modular deletion and accelerate from 130 ms to 90 ms
+  and then 55 ms intervals until release or cancellation.
 
 ### Key Entities
 
@@ -204,8 +215,8 @@ with new dictation and replaces the whole field only if it is still unchanged.
   lifecycle state, and recoverable failure if any.
 - **Transformation result**: The returned text and the session/style identifiers that prove it
   belongs to the active request.
-- **Insertion record**: The exact last inserted text and original transcript needed for safe undo
-  or regeneration; it exists in memory only.
+- **Insertion record**: The last inserted text, original transcript, and optional pre-dictation field
+  snapshot needed for undo or regeneration; it exists in memory only.
 - **Consent preference**: Whether the user has acknowledged cloud processing and free-tier data
   handling; it contains no dictated content.
 
