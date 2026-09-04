@@ -30,6 +30,9 @@ internal fun selectRecognitionMode(
     else -> null
 }
 
+internal fun supportsAutomaticLanguageDetection(sdkInt: Int): Boolean =
+    sdkInt >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+
 class AndroidSpeechToTextProvider(
     private val context: Context,
 ) : SpeechToTextProvider {
@@ -152,6 +155,15 @@ class AndroidSpeechToTextProvider(
         Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                supportsAutomaticLanguageDetection(Build.VERSION.SDK_INT)
+            ) {
+                putExtra(RecognizerIntent.EXTRA_ENABLE_LANGUAGE_DETECTION, true)
+                putExtra(
+                    RecognizerIntent.EXTRA_ENABLE_LANGUAGE_SWITCH,
+                    RecognizerIntent.LANGUAGE_SWITCH_BALANCED,
+                )
+            }
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, preferOffline)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)

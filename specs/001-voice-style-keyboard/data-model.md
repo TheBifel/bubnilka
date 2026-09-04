@@ -13,7 +13,7 @@ Validation: IDs are unique; title and instruction are nonblank; Structured is th
 
 - `id`: monotonically unique value for stale-result rejection
 - `selectedStyle`: `StylePreset`
-- `selectedLanguageMode`: one of UA, EN, UA→EN, EN→UA
+- `selectedLanguageMode`: persistent Ukrainian or English output target
 - `existingFieldText`: optional memory-only snapshot; present by default and absent when field
   combination is disabled
 - `state`: one `KeyboardState`
@@ -49,7 +49,8 @@ Only events carrying the current session ID may change state.
 - `sessionId`
 - `rawTranscript`: 1..2,000 trimmed characters
 - `styleId`
-- `sourceLanguageTag`: `uk-UA` or `en-US`
+- `sourceLanguageTag`: `auto` for normal sessions; an explicit supported tag remains valid for
+  provider-level tests and compatibility
 - `targetLanguageTag`: `uk-UA` or `en-US`
 - `existingFieldText`: optional, at most 6,000 characters; present by default, while `null` means
   the user disabled field combination and requested transcript-only insertion

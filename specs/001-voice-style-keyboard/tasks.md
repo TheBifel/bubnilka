@@ -250,6 +250,20 @@ field and confirm no voice or cloud action can begin.
 
 ---
 
+## Phase 13: Output Language, Strong Structured Cleanup, and System Theme
+
+- [X] T067 Replace four source/target modes with persisted Ukrainian or English output targets and
+  migrate the two legacy translation preference IDs to their previous target language.
+- [X] T068 Auto-detect input in cloud prompts and request Android 14+ recognition language
+  detection/switching while retaining the selected target as fallback locale.
+- [X] T069 Strengthen Structured to preserve voice and original foreign spelling while removing
+  filler, meaningless repetition, unfinished rambling, and unrelated comments.
+- [X] T070 Add resource-qualified light/dark palettes and system-bar appearance that follow system
+  night mode without an app override.
+- [X] T071 Run full verification, light/dark emulator smoke tests, publish APK, commit, and push.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

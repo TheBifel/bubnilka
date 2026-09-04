@@ -1,6 +1,7 @@
 package com.thebifel.bubnilka.core.session
 
 import com.thebifel.bubnilka.core.model.InsertionRecord
+import com.thebifel.bubnilka.core.model.AUTO_DETECT_LANGUAGE_TAG
 import com.thebifel.bubnilka.core.model.KeyboardFailure
 import com.thebifel.bubnilka.core.model.KeyboardState
 import com.thebifel.bubnilka.core.model.LanguageMode
@@ -30,7 +31,7 @@ class KeyboardSession(
         get() = activeExistingFieldTextSnapshot
 
     val activeSpeechLanguageTag: String
-        get() = activeLanguageMode.sourceLanguageTag
+        get() = activeLanguageMode.recognitionLanguageTag
 
     var activeSessionId: Long = 0
         private set
@@ -64,7 +65,7 @@ class KeyboardSession(
             sessionId = sessionId,
             rawTranscript = normalized,
             styleId = selectedStyle.id,
-            sourceLanguageTag = activeLanguageMode.sourceLanguageTag,
+            sourceLanguageTag = AUTO_DETECT_LANGUAGE_TAG,
             targetLanguageTag = activeLanguageMode.targetLanguageTag,
             existingFieldText = activeExistingFieldTextSnapshot,
         )
@@ -135,7 +136,7 @@ class KeyboardSession(
             sessionId = activeSessionId,
             rawTranscript = insertion.rawTranscript,
             styleId = selectedStyle.id,
-            sourceLanguageTag = selectedLanguageMode.sourceLanguageTag,
+            sourceLanguageTag = AUTO_DETECT_LANGUAGE_TAG,
             targetLanguageTag = selectedLanguageMode.targetLanguageTag,
             existingFieldText = insertion.existingFieldText,
         )
@@ -157,7 +158,7 @@ class KeyboardSession(
             sessionId = activeSessionId,
             rawTranscript = rawTranscript,
             styleId = selectedStyle.id,
-            sourceLanguageTag = activeLanguageMode.sourceLanguageTag,
+            sourceLanguageTag = AUTO_DETECT_LANGUAGE_TAG,
             targetLanguageTag = activeLanguageMode.targetLanguageTag,
             existingFieldText = activeExistingFieldTextSnapshot,
         )

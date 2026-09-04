@@ -38,9 +38,12 @@ allowlist and specification before changing the local model value.
    is intentionally invalidated.
 3. Use the provided system buttons to enable and select Bubnilka.
 4. Focus a normal text field in Notes, Telegram, a browser, Gmail, and one additional app.
-5. Open a field and verify listening starts automatically. Select Structured, dictate a Ukrainian
-   sentence, and verify wording is preserved while light structure is added.
-6. Use the gear popup to test EN, UA→EN, and EN→UA, then exercise Undo and Regenerate.
+5. Open a field and verify listening starts automatically. Select Structured, dictate a sentence
+   containing filler, an unrelated comment, and a deliberate foreign term; verify speaking style is
+   preserved, noise is removed, and the foreign term is not transliterated.
+6. In the gear popup select English and dictate Ukrainian, then select Ukrainian and dictate
+   English. Verify each complete result uses the selected language and the selection survives IME
+   recreation. Exercise Undo and Regenerate.
 7. With Combine with field enabled by default, add dictation to existing editor text and verify
    Gemini returns one coherent result with correct spacing and the entire field is replaced. Change
    the field during the request and verify the cloud result still replaces its complete contents.
@@ -52,13 +55,15 @@ allowlist and specification before changing the local model value.
 11. Focus a password field and verify voice/cloud controls are unavailable.
 12. Tap Backspace and verify it removes one word or punctuation mark; hold it and verify deletion
    repeats, accelerates, and stops immediately on release without opening another keyboard.
-13. Capture three cloud timings (first call and two warm calls) without transcript content:
+13. Switch Android between light and dark system themes and verify the app, keyboard, and language
+    popup follow without an in-app theme toggle.
+14. Capture three cloud timings (first call and two warm calls) without transcript content:
 
     ```sh
     adb logcat -s Bubnilka | grep 'timing=gemini_generate'
     ```
 
-14. Record observed latency, recognition accuracy, and app-specific limitations in the project
+15. Record observed latency, recognition accuracy, and app-specific limitations in the project
    feedback notes before claiming device verification.
 
 If Ukrainian on-device recognition is missing, the first dictation should use the system recognizer.

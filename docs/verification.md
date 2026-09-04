@@ -113,3 +113,38 @@ Default whole-field mode тепер передає LLM весь snapshot пол�
 - Розмір: 16 083 939 bytes.
 - SHA-256: `93156d5aaba97c72b86d1341183061b9979a3d615a60fc24eecedb9f9ba6e4ae`.
 - Published: `/tank/files/bubnilka-0.1.0-debug.apk`.
+
+## Output-language, Structured prompt, and Day/Night gate — 2026-09-04 UTC
+
+The gear popup now persists only the target language (`Українська` or `English`). Every normal
+session marks input language as auto-detected for Gemini, and Android 14+ recognition intents ask
+the system service for language detection and balanced switching. Legacy `UA→EN`/`EN→UA`
+preference IDs migrate to their former target language.
+
+The Structured prompt now explicitly preserves the author's recognizable vocabulary, tone, and
+speaking style, keeps deliberate foreign words in original spelling without transliteration, and
+removes filler, meaningless repetition, unfinished rambling, and unrelated comments. Prompt tests
+also distinguish ordinary foreign-language prose, which must still be translated to the target,
+from deliberate foreign terms that must remain unchanged.
+
+Full verification succeeded:
+
+- 31 KMP/JVM tests passed, including target-language migration and prompt invariants;
+- 24 Android unit tests passed, including the Android 14 language-detection capability boundary;
+- Android Lint: `No issues found`;
+- debug APK, `compileReleaseKotlin`, and release manifest processing succeeded;
+- APK Signature Scheme v2 verified and the debug-only UI receiver is absent from release.
+
+Android 15 emulator checks confirmed that the popup contains exactly `Українська`, `English`, and
+`Об’єднувати з полем`; selecting English wrote `language_mode=english` and the IME accessibility
+description immediately reflected it. PNG inspection covered light IME/popup plus dark onboarding,
+IME, and popup. Backgrounds, text, chips, icons, controls, and system bars followed system night
+mode without an app setting. Actual mixed-language speech accuracy remains device/provider-only
+because the headless emulator has no real audio input and recognizers may ignore optional language
+detection extras.
+
+Final APK for this pass:
+
+- Size: 16 083 939 bytes.
+- SHA-256: `2a7ce71d879526391521344e0a7049dfca6ee1e75e1ef9ee1664678b9b7b04e3`.
+- Published: `/tank/files/bubnilka-0.1.0-debug.apk`.

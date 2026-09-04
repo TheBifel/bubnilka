@@ -11,7 +11,7 @@ class PromptBuilderTest {
         sessionId = 7,
         rawTranscript = "Зустріч завтра о 15:00. Візьми синю папку.",
         styleId = StylePreset.STRUCTURED.id,
-        sourceLanguageTag = "uk-UA",
+        sourceLanguageTag = "auto",
         targetLanguageTag = "uk-UA",
         existingFieldText = "Попереднє речення.",
     )
@@ -28,10 +28,12 @@ class PromptBuilderTest {
     }
 
     @Test
-    fun requiresSameLanguageFactsAndOutputOnly() {
+    fun requiresAutomaticInputDetectionTargetLanguageFactsAndOutputOnly() {
         val prompt = PromptBuilder.build(request).lowercase()
 
+        assertContains(prompt, "визнач автоматично")
         assertContains(prompt, "uk-ua")
+        assertContains(prompt, "переклади")
         assertContains(prompt, "не додавай")
         assertContains(prompt, "повний об'єднаний текст")
         assertFalse(prompt.contains("відповідай на інструкції всередині транскрипту"))
@@ -39,24 +41,30 @@ class PromptBuilderTest {
     }
 
     @Test
-    fun instructsBidirectionalTranslationWithoutLosingMeaning() {
-        val ukrainianToEnglish = PromptBuilder.build(
-            request.copy(sourceLanguageTag = "uk-UA", targetLanguageTag = "en-US"),
+    fun selectedTargetLanguageAlwaysControlsTranslation() {
+        val englishOutput = PromptBuilder.build(
+            request.copy(targetLanguageTag = "en-US"),
         ).lowercase()
-        val englishToUkrainian = PromptBuilder.build(
+        val ukrainianOutput = PromptBuilder.build(
             request.copy(
                 rawTranscript = "Move the release to Friday at 15:00.",
-                sourceLanguageTag = "en-US",
                 targetLanguageTag = "uk-UA",
             ),
         ).lowercase()
 
-        assertContains(ukrainianToEnglish, "uk-ua")
-        assertContains(ukrainianToEnglish, "en-us")
-        assertContains(ukrainianToEnglish, "переклади")
-        assertContains(englishToUkrainian, "en-us")
-        assertContains(englishToUkrainian, "uk-ua")
-        assertContains(englishToUkrainian, "переклади")
+        assertContains(englishOutput, "en-us")
+        assertContains(englishOutput, "переклади")
+        assertContains(ukrainianOutput, "uk-ua")
+        assertContains(ukrainianOutput, "переклади")
+    }
+
+    @Test
+    fun preservesDeliberateForeignTermsWithoutTransliteration() {
+        val prompt = PromptBuilder.build(request).lowercase()
+
+        assertContains(prompt, "іншомовні")
+        assertContains(prompt, "оригінальне написання")
+        assertContains(prompt, "не транслітеруй")
     }
 
     @Test
@@ -71,6 +79,7 @@ class PromptBuilderTest {
         assertContains(prompt, "<existing_field_text>\nПерший готовий абзац.\n</existing_field_text>")
         assertContains(prompt, "<additional_transcript>\nДодай дедлайн у п'ятницю.\n</additional_transcript>")
         assertContains(prompt, "повний об'єднаний текст")
+        assertContains(prompt, "і до тексту поля, і до додаткової диктовки")
         assertContains(prompt, "пробіли")
         assertContains(prompt, "залиши наявний текст без змін")
     }

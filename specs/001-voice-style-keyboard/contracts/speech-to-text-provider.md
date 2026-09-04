@@ -3,8 +3,9 @@
 ## Purpose
 
 Produce partial and final text from an automatically or explicitly initiated recording session,
-using the selected `uk-UA` or `en-US` source language and preferring local
-recognition without blocking the MVP on an absent offline model.
+using automatic language detection/switching when the Android recognition service supports it,
+the selected `uk-UA` or `en-US` output language as fallback locale, and preferring local recognition
+without blocking the MVP on an absent offline model.
 
 ## Events
 
@@ -22,6 +23,8 @@ result ends the recording session exactly once.
 ## Privacy and lifecycle
 
 - The provider must prefer the explicit on-device recognizer.
+- On Android 14+, the provider should request language detection and balanced language switching;
+  recognition services are permitted to ignore unsupported extras.
 - If the on-device service or requested language is unavailable, it must fall back to the system
   recognizer, which may use a network service.
 - After a system-recognizer session, it should ask Android to download the requested offline model;

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bubnilka_primary">#B9A7FF</color>
+    <color name="bubnilka_background">#121016</color>
+    <color name="bubnilka_surface">#1D1923</color>
+    <color name="bubnilka_text">#EAE1F2</color>
+    <color name="bubnilka_muted">#C9BFCF</color>
+    <color name="bubnilka_on_primary">#24105F</color>
+    <color name="bubnilka_primary_pressed">#A18CEF</color>
+    <color name="bubnilka_chip">#2B2533</color>
+    <color name="bubnilka_chip_pressed">#393143</color>
+    <color name="bubnilka_outline">#554B5F</color>
+    <color name="bubnilka_disabled">#766C7F</color>
+    <color name="bubnilka_disabled_surface">#27222D</color>
+</resources>

@@ -4,7 +4,8 @@
         <item name="android:fontFamily">sans</item>
         <item name="android:colorAccent">@color/bubnilka_primary</item>
         <item name="android:navigationBarColor">@color/bubnilka_background</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowLightNavigationBar">@bool/bubnilka_light_system_bars</item>
+        <item name="android:windowLightStatusBar">@bool/bubnilka_light_system_bars</item>
         <item name="android:windowBackground">@color/bubnilka_background</item>
     </style>
 
@@ -36,5 +37,11 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@color/bubnilka_text</item>
         <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="Theme.Bubnilka.Popup" parent="android:style/Theme.Material.Light">
+        <item name="android:colorAccent">@color/bubnilka_primary</item>
+        <item name="android:colorBackground">@color/bubnilka_surface</item>
+        <item name="android:textColorPrimary">@color/bubnilka_text</item>
     </style>
 </resources>

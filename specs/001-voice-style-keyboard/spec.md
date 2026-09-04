@@ -111,17 +111,18 @@ and secure fields without examining implementation details.
 
 ### User Story 5 - Select Language, Translate, and Extend a Field (Priority: P2)
 
-The user opens a gear menu to select Ukrainian, English, Ukrainian-to-English, or
-English-to-Ukrainian. Combine with field is enabled by default: it gives the complete editor and
-new dictation to the model, which returns one coherent text that replaces the entire field. The
-user can disable it to transform and insert only the new dictation at the cursor.
+The user opens a gear menu to select Ukrainian or English as the persistent output language.
+Input language is detected automatically and ordinary prose is always translated to the selected
+language. Combine with field is enabled by default: it gives the complete editor and new dictation
+to the model, which returns one coherent text that replaces the entire field. The user can disable
+it to transform and insert only the new dictation at the cursor.
 
 **Acceptance Scenarios**:
 
-1. **Given** UA→EN is selected, **When** Ukrainian speech is recognized, **Then** the result is
-   English and retains every name, number, fact, nuance, and intent.
-2. **Given** EN→UA is selected, **When** English speech is recognized, **Then** the result is
-   Ukrainian with the same meaning.
+1. **Given** English is selected, **When** Ukrainian or mixed-language speech is recognized,
+   **Then** ordinary prose is English while deliberate foreign terms retain their original spelling.
+2. **Given** Ukrainian is selected, **When** English or mixed-language speech is recognized,
+   **Then** ordinary prose is Ukrainian with the same meaning.
 3. **Given** Combine with field is enabled, **When** dictation completes, **Then** the complete field
    and additional transcript are sent as separate untrusted data sections and the model returns one
    coherent text with natural whitespace and transitions.
@@ -184,18 +185,21 @@ user can disable it to transform and insert only the new dictation at the cursor
 - **FR-017**: Only one recording or transformation session may be active; starting a new session
   MUST cancel or supersede stale work so stale results cannot be inserted.
 - **FR-018**: The product MUST provide a visible way to switch to another enabled keyboard.
-- **FR-019**: The keyboard MUST provide an always-available Backspace control that deletes the
-  current selection or one Unicode code point before the cursor through the active input connection.
+- **FR-019**: The keyboard MUST provide an always-available Backspace control through the active
+  input connection.
 - **FR-020**: Cloud transformation diagnostics MUST record request duration and failure category
   without recording prompts, transcripts, generated output, or other user content.
-- **FR-021**: The keyboard MUST support Ukrainian and English recognition plus UA→EN and EN→UA
-  translation modes selected from a gear popup.
+- **FR-021**: The gear popup MUST persist Ukrainian or English as the output language; input
+  language MUST be auto-detected where the system recognizer supports it, and ordinary prose MUST
+  always be translated to the selected output language.
 - **FR-022**: After current disclosure consent, the keyboard MUST automatically start listening
   whenever it opens in a supported non-sensitive field.
 - **FR-023**: The transcript preview MUST automatically follow new partial text to the bottom and
   MUST allow manual scrolling; auto-follow pauses while the user remains scrolled upward.
-- **FR-024**: Structured MUST preserve the author's wording, tone, length, and order, applying only
-  punctuation, paragraphs, and numbering/list markers already implied by the content.
+- **FR-024**: Structured MUST preserve the author's wording, tone, and speaking style where useful,
+  remove filler, meaningless repetitions, unfinished rambling, and unrelated side comments, retain
+  deliberate foreign words in their original spelling without transliteration, and add punctuation,
+  paragraphs, and list structure where appropriate.
 - **FR-025**: Combine with field MUST default to enabled, persist the user's toggle, and disclose
   complete field upload and unconditional whole-editor replacement.
 - **FR-026**: In combined mode the prompt MUST ask the model to retain already suitable field text
@@ -206,11 +210,13 @@ user can disable it to transform and insert only the new dictation at the cursor
   trailing whitespace belongs to the deleted module.
 - **FR-029**: Holding Backspace MUST repeat modular deletion and accelerate from 130 ms to 90 ms
   and then 55 ms intervals until release or cancellation.
+- **FR-030**: The app and IME MUST expose light and dark palettes selected solely by the current
+  Android system night-mode configuration.
 
 ### Key Entities
 
 - **Style preset**: A stable style identifier, user-facing title, and transformation intent.
-- **Language mode**: Recognition and output language pair for monolingual or translation flows.
+- **Language mode**: Persistent Ukrainian or English output target and recognition fallback locale.
 - **Dictation session**: The active session identity, selected style, partial/final transcript,
   lifecycle state, and recoverable failure if any.
 - **Transformation result**: The returned text and the session/style identifiers that prove it

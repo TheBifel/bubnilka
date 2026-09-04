@@ -25,4 +25,11 @@ class SpeechRecognitionModeTest {
     fun reportsUnavailableWhenNoRecognitionServiceExists() {
         assertNull(selectRecognitionMode(onDeviceAvailable = false, systemAvailable = false))
     }
+
+    @Test
+    fun requestsAutomaticLanguageDetectionFromAndroid14() {
+        assertEquals(false, supportsAutomaticLanguageDetection(sdkInt = 33))
+        assertEquals(true, supportsAutomaticLanguageDetection(sdkInt = 34))
+        assertEquals(true, supportsAutomaticLanguageDetection(sdkInt = 36))
+    }
 }

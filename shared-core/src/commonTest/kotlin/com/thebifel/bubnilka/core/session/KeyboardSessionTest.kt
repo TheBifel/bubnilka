@@ -47,16 +47,16 @@ class KeyboardSessionTest {
     }
 
     @Test
-    fun selectedTranslationModeControlsSpeechAndOutputLanguages() {
+    fun selectedLanguageControlsFallbackRecognitionAndOutputWhileInputIsAutoDetected() {
         val session = KeyboardSession()
-        session.selectLanguageMode(LanguageMode.ENGLISH_TO_UKRAINIAN)
+        session.selectLanguageMode(LanguageMode.ENGLISH)
         val sessionId = session.startListening()
 
-        val request = session.onFinalTranscript(sessionId, "Keep every detail")
+        val request = session.onFinalTranscript(sessionId, "Збережи всі деталі")
 
         assertEquals("en-US", session.activeSpeechLanguageTag)
-        assertEquals("en-US", request?.sourceLanguageTag)
-        assertEquals("uk-UA", request?.targetLanguageTag)
+        assertEquals("auto", request?.sourceLanguageTag)
+        assertEquals("en-US", request?.targetLanguageTag)
     }
 
     @Test

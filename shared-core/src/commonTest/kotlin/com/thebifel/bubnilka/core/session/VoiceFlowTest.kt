@@ -62,10 +62,10 @@ class VoiceFlowTest {
     }
 
     @Test
-    fun englishToUkrainianUsesEnglishRecognition() = runTest {
+    fun selectedOutputLanguageIsAlsoRecognitionFallback() = runTest {
         val speech = FakeSpeechProvider()
         val session = KeyboardSession()
-        session.selectLanguageMode(LanguageMode.ENGLISH_TO_UKRAINIAN)
+        session.selectLanguageMode(LanguageMode.ENGLISH)
         val flow = VoiceFlow(session, speech, FakeCloudProvider(), FakeInsertionPort(), this)
 
         flow.start()

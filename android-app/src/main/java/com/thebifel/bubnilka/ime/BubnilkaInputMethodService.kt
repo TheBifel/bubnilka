@@ -2,6 +2,7 @@ package com.thebifel.bubnilka.ime
 
 import android.annotation.SuppressLint
 import android.inputmethodservice.InputMethodService
+import android.view.ContextThemeWrapper
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -345,14 +346,12 @@ class BubnilkaInputMethodService : InputMethodService() {
     }
 
     private fun showLanguageMenu(anchor: View) {
-        PopupMenu(this, anchor).apply {
+        PopupMenu(ContextThemeWrapper(this, R.style.Theme_Bubnilka_Popup), anchor).apply {
             menu.add(LANGUAGE_GROUP, MENU_UKRAINIAN, 0, R.string.language_ukrainian)
             menu.add(LANGUAGE_GROUP, MENU_ENGLISH, 1, R.string.language_english)
-            menu.add(LANGUAGE_GROUP, MENU_UK_TO_EN, 2, R.string.language_uk_to_en_full)
-            menu.add(LANGUAGE_GROUP, MENU_EN_TO_UK, 3, R.string.language_en_to_uk_full)
             menu.setGroupCheckable(LANGUAGE_GROUP, true, true)
             menu.findItem(menuId(session.selectedLanguageMode)).isChecked = true
-            menu.add(0, MENU_FIELD_CONTEXT, 4, R.string.field_context_menu).apply {
+            menu.add(0, MENU_FIELD_CONTEXT, 2, R.string.field_context_menu).apply {
                 isCheckable = true
                 isChecked = includeFieldContext
             }
@@ -402,23 +401,17 @@ class BubnilkaInputMethodService : InputMethodService() {
     private fun menuId(languageMode: LanguageMode): Int = when (languageMode) {
         LanguageMode.UKRAINIAN -> MENU_UKRAINIAN
         LanguageMode.ENGLISH -> MENU_ENGLISH
-        LanguageMode.UKRAINIAN_TO_ENGLISH -> MENU_UK_TO_EN
-        LanguageMode.ENGLISH_TO_UKRAINIAN -> MENU_EN_TO_UK
     }
 
     private fun languageMode(menuId: Int): LanguageMode? = when (menuId) {
         MENU_UKRAINIAN -> LanguageMode.UKRAINIAN
         MENU_ENGLISH -> LanguageMode.ENGLISH
-        MENU_UK_TO_EN -> LanguageMode.UKRAINIAN_TO_ENGLISH
-        MENU_EN_TO_UK -> LanguageMode.ENGLISH_TO_UKRAINIAN
         else -> null
     }
 
     private fun languageModeTitle(languageMode: LanguageMode): Int = when (languageMode) {
         LanguageMode.UKRAINIAN -> R.string.language_ukrainian
         LanguageMode.ENGLISH -> R.string.language_english
-        LanguageMode.UKRAINIAN_TO_ENGLISH -> R.string.language_uk_to_en_full
-        LanguageMode.ENGLISH_TO_UKRAINIAN -> R.string.language_en_to_uk_full
     }
 
     private fun failureMessage(failure: KeyboardFailure): Int = when (failure) {
@@ -444,8 +437,6 @@ class BubnilkaInputMethodService : InputMethodService() {
         const val LANGUAGE_GROUP = 1
         const val MENU_UKRAINIAN = 101
         const val MENU_ENGLISH = 102
-        const val MENU_UK_TO_EN = 103
-        const val MENU_EN_TO_UK = 104
         const val MENU_FIELD_CONTEXT = 201
     }
 }

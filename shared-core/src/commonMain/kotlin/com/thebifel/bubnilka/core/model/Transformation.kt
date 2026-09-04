@@ -8,8 +8,8 @@ data class TransformationRequest(
     val sessionId: Long,
     val rawTranscript: String,
     val styleId: String,
-    val sourceLanguageTag: String = "uk-UA",
-    val targetLanguageTag: String = sourceLanguageTag,
+    val sourceLanguageTag: String = AUTO_DETECT_LANGUAGE_TAG,
+    val targetLanguageTag: String = LanguageMode.default.targetLanguageTag,
     val existingFieldText: String? = null,
 ) {
     init {
@@ -18,7 +18,7 @@ data class TransformationRequest(
         require(rawTranscript.length <= MAX_TRANSCRIPT_LENGTH)
         require(rawTranscript == rawTranscript.trim())
         require(StylePreset.fromId(styleId) != null)
-        require(LanguageMode.supports(sourceLanguageTag))
+        require(sourceLanguageTag == AUTO_DETECT_LANGUAGE_TAG || LanguageMode.supports(sourceLanguageTag))
         require(LanguageMode.supports(targetLanguageTag))
         require(existingFieldText == null || existingFieldText.length <= MAX_FIELD_CONTEXT_LENGTH)
     }

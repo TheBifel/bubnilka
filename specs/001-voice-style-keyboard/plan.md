@@ -22,8 +22,8 @@ provider contracts. Android-only adapters own speech recognition, Firebase, pref
 `com.android.kotlin.multiplatform.library`, Kotlin coroutines, Firebase Android BoM 34.18.0,
 Firebase AI Logic 17.16.0, Firebase App Check 19.4.1, AndroidX Core/Activity/Lifecycle
 
-**Storage**: Android preferences for consent and selected style only; transcripts and insertion
-records remain in memory
+**Storage**: Android preferences for consent, selected output language, and whole-field mode only;
+transcripts and insertion records remain in memory
 
 **Testing**: Kotlin `commonTest`, Android host/JVM unit tests, Android Lint, fake provider/connection
 contract tests, manual Samsung Galaxy S21 smoke test

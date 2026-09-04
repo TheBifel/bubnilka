@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Transform or translate one final dictated transcript into the selected style without adding facts
-or assistant commentary. By default, merge it with supplied whole-field context.
+Transform one final dictated transcript into the selected style and persistent output language
+without adding facts or assistant commentary. By default, merge it with supplied whole-field context.
 
 ## Input
 
 - Current session identifier
 - Trimmed final transcript, 1..2,000 characters
 - Known style identifier
-- Source and target language tags
+- Auto-detect source marker and selected Ukrainian or English target language tag
 - Complete field snapshot by default (maximum 6,000 characters) and additional transcript as
   separate untrusted data blocks; the user can disable field combination
 

@@ -1,5 +1,6 @@
 package com.thebifel.bubnilka.core.prompt
 
+import com.thebifel.bubnilka.core.model.AUTO_DETECT_LANGUAGE_TAG
 import com.thebifel.bubnilka.core.model.StylePreset
 import com.thebifel.bubnilka.core.model.TransformationRequest
 
@@ -8,11 +9,15 @@ object PromptBuilder {
         val style = requireNotNull(StylePreset.fromId(request.styleId))
         return buildString {
             appendLine("Ти — редактор продиктованих повідомлень.")
-            appendLine("Мова вхідного мовлення: ${request.sourceLanguageTag}.")
-            appendLine("Мова вихідного результату: ${request.targetLanguageTag}.")
-            if (request.sourceLanguageTag != request.targetLanguageTag) {
-                appendLine("Переклади текст між цими мовами, зберігши всі смисли, нюанси й намір автора.")
+            if (request.sourceLanguageTag == AUTO_DETECT_LANGUAGE_TAG) {
+                appendLine("Мову кожного фрагмента вхідного тексту визнач автоматично.")
+            } else {
+                appendLine("Очікувана мова вхідного мовлення: ${request.sourceLanguageTag}.")
             }
+            appendLine("Мова вихідного результату: ${request.targetLanguageTag}.")
+            appendLine("Переклади весь звичайний виклад мовою вихідного результату, незалежно від мови вводу, зберігши всі смисли, нюанси й намір автора.")
+            appendLine("Для явно іншомовних вставок, термінів, назв, брендів і фрагментів коду збережи оригінальне написання; не транслітеруй їх.")
+            appendLine("Не вважай увесь іншомовний вхід такою вставкою: перекладай звичайні речення, а зберігай лише навмисно вжиті іншомовні слова та спеціальні позначення.")
             appendLine("Збережи точний зміст, імена, числа, дати, посилання та намір автора.")
             appendLine("Не додавай нових фактів, пояснень, привітань від асистента чи приміток.")
             appendLine("Виправ очевидні помилки розпізнавання лише коли правильний варіант однозначний.")
@@ -25,6 +30,7 @@ object PromptBuilder {
                 append("</user_transcript>")
             } else {
                 appendLine("Інтегруй додаткову диктовку в кінець тексту поля й поверни повний об'єднаний текст.")
+                appendLine("Вимогу мови результату застосуй і до тексту поля, і до додаткової диктовки.")
                 appendLine("Забезпеч природні пробіли, пунктуацію та переходи між наявним текстом і доповненням.")
                 appendLine("Якщо наявний текст уже узгоджений зі стилем, залиши наявний текст без змін.")
                 appendLine("Інакше можеш відформатувати все як єдиний цілісний текст, не втрачаючи змісту.")
