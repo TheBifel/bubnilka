@@ -70,6 +70,7 @@ class BubnilkaInputMethodService : InputMethodService() {
             insertion = insertion,
             scope = coroutineOwner.scope,
             onStateChanged = { state -> view.post { render(state) } },
+            onAudioLevelChanged = { level -> view.post { renderAudioLevel(level) } },
         )
 
         bindStyle(view, R.id.style_structured_button, StylePreset.STRUCTURED)
@@ -225,6 +226,7 @@ class BubnilkaInputMethodService : InputMethodService() {
         val transcript = view.findViewById<TextView>(R.id.transcript_text)
         val transcriptScroll = view.findViewById<ScrollView>(R.id.transcript_scroll)
         val microphone = view.findViewById<View>(R.id.microphone_button)
+        val microphoneRipple = view.findViewById<VoiceRippleView>(R.id.microphone_ripple)
         val retry = view.findViewById<Button>(R.id.retry_button)
         val insertRaw = view.findViewById<Button>(R.id.insert_raw_button)
         val recoveryActions = view.findViewById<View>(R.id.recovery_actions)
@@ -313,6 +315,7 @@ class BubnilkaInputMethodService : InputMethodService() {
         microphone.contentDescription = getString(
             if (state is KeyboardState.Listening) R.string.cancel_dictation else R.string.start_dictation,
         )
+        microphoneRipple.setListening(state is KeyboardState.Listening)
 
         val mayEditInsertion = session.lastInsertion != null &&
             state !is KeyboardState.Transforming &&
@@ -333,6 +336,10 @@ class BubnilkaInputMethodService : InputMethodService() {
 
     private fun renderStyle(view: View, buttonId: Int, selected: Boolean) {
         renderSelection(view, buttonId, selected)
+    }
+
+    private fun renderAudioLevel(level: Float) {
+        keyboardView?.findViewById<VoiceRippleView>(R.id.microphone_ripple)?.setAudioLevel(level)
     }
 
     private fun renderSelection(view: View, buttonId: Int, selected: Boolean) {

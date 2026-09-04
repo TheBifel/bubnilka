@@ -8,6 +8,7 @@ sealed interface SpeechEvent {
     data class Ready(override val sessionId: Long) : SpeechEvent
     data class ListeningStarted(override val sessionId: Long) : SpeechEvent
     data class Partial(override val sessionId: Long, val text: String) : SpeechEvent
+    data class AudioLevel(override val sessionId: Long, val level: Float) : SpeechEvent
     data class Final(override val sessionId: Long, val text: String) : SpeechEvent
     data class EndOfSpeech(override val sessionId: Long) : SpeechEvent
     data class Failure(

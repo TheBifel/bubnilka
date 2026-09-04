@@ -91,18 +91,40 @@
 
 ## Cloud latency diagnostics
 
-- **Decision**: Record elapsed time around the Firebase `generateContent()` call as a content-free
-  `gemini_generate` timing. Do not log prompt/output size or text. Collect first-call and warm-call
-  samples before changing the model path.
-- **Rationale**: The current flow invokes Firebase immediately after final STT and has no local
-  queue or artificial delay. A single end-to-end timing distinguishes the cloud boundary from UI
-  and STT, while repeated samples reveal App Check/TLS cold-start effects.
-- **Next candidates after measurement**: stream partial model output for perceived latency, A/B the
-  allowlisted Flash-Lite models, cap output tokens, and prefetch App Check only if the first request
-  is uniquely slow.
+- **Finding**: Each `generateContent()` invocation is an independent single-turn request. Pressing
+  Regenerate re-sends the same raw transcript and original field snapshot; it does not continue a
+  chat or provide the previous answer. A better regenerated answer is therefore normal model
+  variance, not the model retaining a hidden warm-up example. A new dictation in combined mode is
+  different: it includes the already cleaned field, which gives the model stronger context and can
+  legitimately improve quality.
+- **Latency finding**: The first request in a process can pay one-time client, TLS/network, and App
+  Check token work. App Check attestation itself adds latency, tokens default to a one-hour TTL, and
+  the SDK normally refreshes them around half-TTL. The selected `gemini-3.5-flash-lite` already
+  defaults to `MINIMAL` thinking, so reducing thinking is not an available speed-up for this model.
+  Current Gemini 3.x sampling controls are ignored, so temperature/top-p/top-k tuning is also not a
+  valid latency or determinism fix.
+- **Decision**: Keep one real model request per user action—do not spend free-tier quota on a dummy
+  warm-up. Record the existing content-free `gemini_generate` timing plus
+  `gemini_generate_first_process` or `gemini_generate_repeat_process`, then decide from physical
+  device samples. If warm requests still miss the target, next candidates are shorter output
+  bounds or streaming for perceived latency.
 - **Sources**: [Firebase streaming](https://firebase.google.com/docs/ai-logic/generate-text),
   [Firebase latency troubleshooting](https://firebase.google.com/docs/ai-logic/faq-and-troubleshooting),
-  [thinking configuration](https://firebase.google.com/docs/ai-logic/thinking).
+  [thinking configuration](https://firebase.google.com/docs/ai-logic/thinking),
+  [App Check Play Integrity](https://firebase.google.com/docs/app-check/android/play-integrity-provider),
+  [Gemini generateContent](https://ai.google.dev/api/generate-content), and
+  [Firebase model parameters](https://firebase.google.com/docs/ai-logic/model-parameters).
+
+## Loudness-reactive microphone feedback
+
+- **Decision**: Normalize `RecognitionListener.onRmsChanged()` values to `0..1`, reject stale
+  session callbacks in shared orchestration, and feed a custom lightweight Android `View` directly.
+  Draw a subtle idle pulse while listening and three louder expanding rings as energy rises.
+- **Rationale**: RMS callbacks can arrive many times per second. Keeping them outside
+  `KeyboardState` avoids rebinding text, buttons, and scroll position at audio frequency while still
+  making recording state and relative loudness immediately visible.
+- **Alternatives considered**: A fixed blinking icon does not communicate input energy. Animated
+  bitmap assets cannot follow live loudness cleanly and add package weight.
 
 ## Free-tier privacy and diagnostics
 

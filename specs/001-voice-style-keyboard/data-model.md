@@ -35,6 +35,9 @@ Failure -> Listening | Transforming (retry) | Inserted (raw) | Idle
 
 Only events carrying the current session ID may change state.
 
+Recognizer RMS is mapped to a transient normalized `AudioLevel` event. It is routed directly to
+the listening visualization, never persisted, and does not trigger a full `KeyboardState` render.
+
 ## KeyboardState
 
 - `Idle(selectedStyle)`

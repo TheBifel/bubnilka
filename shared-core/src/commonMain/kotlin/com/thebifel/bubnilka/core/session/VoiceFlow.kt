@@ -21,6 +21,7 @@ class VoiceFlow(
     private val insertion: TextInsertionPort,
     private val scope: CoroutineScope,
     private val onStateChanged: (KeyboardState) -> Unit = {},
+    private val onAudioLevelChanged: (Float) -> Unit = {},
 ) {
     fun start(includeFieldContext: Boolean = true): Long {
         val existingFieldText = if (includeFieldContext) insertion.readAllText() else null
@@ -137,6 +138,12 @@ class VoiceFlow(
     }
 
     private fun handleSpeechEvent(event: SpeechEvent) {
+        if (event is SpeechEvent.AudioLevel) {
+            if (event.sessionId == session.activeSessionId && session.state is KeyboardState.Listening) {
+                onAudioLevelChanged(event.level)
+            }
+            return
+        }
         when (event) {
             is SpeechEvent.Partial -> session.onPartialTranscript(event.sessionId, event.text)
             is SpeechEvent.Final -> transformFinal(event)
@@ -146,6 +153,7 @@ class VoiceFlow(
             is SpeechEvent.ListeningStarted,
             is SpeechEvent.EndOfSpeech,
             -> Unit
+            is SpeechEvent.AudioLevel -> Unit
         }
         notifyState()
     }

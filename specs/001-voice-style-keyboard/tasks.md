@@ -264,6 +264,18 @@ field and confirm no voice or cloud action can begin.
 
 ---
 
+## Phase 14: Gemini Warm-Path Diagnostics and Voice Ripple
+
+- [X] T072 Trace regeneration, prompt context, Gemini request lifecycle, App Check, and model
+  thinking defaults; document the cold-path and quality findings.
+- [X] T073 Add normalized speech audio-level events with stale-session rejection and host tests.
+- [X] T074 Add an animated system-theme microphone ripple with loudness-driven expansion while
+  keeping high-frequency audio callbacks out of full keyboard rendering.
+- [X] T075 Run full verification, inspect the listening UI on the emulator, publish APK, commit,
+  and push.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

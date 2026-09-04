@@ -74,6 +74,27 @@ class VoiceFlowTest {
     }
 
     @Test
+    fun routesActiveAudioLevelToUiAndIgnoresStaleSessions() = runTest {
+        val speech = FakeSpeechProvider()
+        var observedLevel = 0f
+        val flow = VoiceFlow(
+            session = KeyboardSession(),
+            speech = speech,
+            cloud = FakeCloudProvider(),
+            insertion = FakeInsertionPort(),
+            scope = this,
+            onAudioLevelChanged = { observedLevel = it },
+        )
+
+        val sessionId = flow.start()
+        speech.emit(SpeechEvent.AudioLevel(sessionId, 0.75f))
+        assertEquals(0.75f, observedLevel)
+
+        speech.emit(SpeechEvent.AudioLevel(sessionId + 1, 0.25f))
+        assertEquals(0.75f, observedLevel)
+    }
+
+    @Test
     fun disabledFieldCombinationTransformsOnlyDictationAndInsertsAtCursor() = runTest {
         val speech = FakeSpeechProvider()
         val cloud = FakeCloudProvider()

@@ -212,6 +212,11 @@ it to transform and insert only the new dictation at the cursor.
   and then 55 ms intervals until release or cancellation.
 - **FR-030**: The app and IME MUST expose light and dark palettes selected solely by the current
   Android system night-mode configuration.
+- **FR-031**: While speech recognition is active, the microphone MUST show a continuous ripple;
+  its expansion and opacity MUST react to normalized recognizer loudness and disappear outside the
+  listening state.
+- **FR-032**: Cloud timing diagnostics MUST distinguish the first Gemini request in an application
+  process from repeat requests without logging field text, transcripts, prompts, or responses.
 
 ### Key Entities
 
@@ -245,6 +250,8 @@ it to transform and insert only the new dictation at the cursor.
   keyboard switching, and safe behavior, with any app-specific limitation recorded.
 - **SC-007**: No payment method, server dependency, dictated-content log, or committed credential is
   required to complete the successful MVP flow.
+- **SC-008**: Listening state is visually identifiable without reading status text, and louder
+  physical-device speech visibly produces stronger microphone waves than silence.
 
 ## Assumptions
 

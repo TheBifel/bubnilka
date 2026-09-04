@@ -33,6 +33,9 @@ internal fun selectRecognitionMode(
 internal fun supportsAutomaticLanguageDetection(sdkInt: Int): Boolean =
     sdkInt >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
 
+internal fun normalizeRmsDb(rmsDb: Float): Float =
+    if (rmsDb.isFinite()) ((rmsDb + 2f) / 12f).coerceIn(0f, 1f) else 0f
+
 class AndroidSpeechToTextProvider(
     private val context: Context,
 ) : SpeechToTextProvider {
@@ -183,7 +186,13 @@ class AndroidSpeechToTextProvider(
             emitIfActive(sessionId, attemptId, SpeechEvent.ListeningStarted(sessionId))
         }
 
-        override fun onRmsChanged(rmsdB: Float) = Unit
+        override fun onRmsChanged(rmsdB: Float) {
+            emitIfActive(
+                sessionId,
+                attemptId,
+                SpeechEvent.AudioLevel(sessionId, normalizeRmsDb(rmsdB)),
+            )
+        }
         override fun onBufferReceived(buffer: ByteArray?) = Unit
 
         override fun onEndOfSpeech() {

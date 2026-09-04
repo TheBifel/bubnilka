@@ -148,3 +148,37 @@ Final APK for this pass:
 - Size: 16 083 939 bytes.
 - SHA-256: `2a7ce71d879526391521344e0a7049dfca6ee1e75e1ef9ee1664678b9b7b04e3`.
 - Published: `/tank/files/bubnilka-0.1.0-debug.apk`.
+
+## Gemini warm-path diagnostics and microphone ripple — 2026-09-04 UTC
+
+Code tracing confirmed that Regenerate is another independent `generateContent()` request with the
+same raw transcript and original field snapshot; it is not a chat continuation and does not receive
+the previous answer. A later dictation in combined mode is materially different because its field
+snapshot can contain the previous cleaned result. Firebase timing now retains the content-free
+`gemini_generate` measurement and additionally labels the first request in the application process
+as `gemini_generate_first_process`; all later attempts are `gemini_generate_repeat_process`.
+
+Speech recognizer RMS callbacks now produce normalized `0..1` audio-level events. Shared flow tests
+prove that levels from stale session IDs are rejected. The Android IME routes active levels directly
+to a custom ripple view, avoiding a complete keyboard render for every audio callback.
+
+Full verification succeeded:
+
+- 32 KMP/JVM tests passed, including active/stale audio-level routing;
+- 25 Android unit tests passed, including finite/clamped RMS normalization;
+- Android Lint: no issues;
+- debug APK, `compileReleaseKotlin`, and release manifest processing succeeded;
+- APK Signature Scheme v2 verified and the debug-only UI receiver is absent from release.
+
+The final APK was installed on the Android 15 headless emulator. Direct IME inspection confirmed a
+`100dp` ripple layer centered behind the `64dp` microphone without overlapping the keyboard switch,
+settings, or Backspace controls. A PNG fallback confirmed the quiet listening pulse in the dark
+system theme. The emulator automatically entered listening and then reported no speech, as expected
+without an audio input; physical-device voice-amplitude response and real Firebase cold/warm timings
+remain device-only checks.
+
+Final APK for this pass:
+
+- Size: 16 083 939 bytes.
+- SHA-256: `d4b520adf1040175e50442697da6e12077bffc49af19d6f059e1d35507c05141`.
+- Published: `/tank/files/bubnilka-0.1.0-debug.apk`.

@@ -11,6 +11,7 @@ without blocking the MVP on an absent offline model.
 
 - Ready
 - Listening started
+- Audio level (`0.0..1.0`, normalized for visualization only)
 - Partial transcript
 - Final transcript
 - End of speech
@@ -19,6 +20,9 @@ without blocking the MVP on an absent offline model.
 
 Every event includes the originating session identifier. Empty partial results are ignored. A final
 result ends the recording session exactly once.
+
+Audio-level callbacks are transient: stale-session levels are discarded, they never enter the
+keyboard state model or diagnostics, and they drive only the microphone visualization.
 
 ## Privacy and lifecycle
 

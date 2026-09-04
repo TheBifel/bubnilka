@@ -40,7 +40,8 @@ allowlist and specification before changing the local model value.
 4. Focus a normal text field in Notes, Telegram, a browser, Gmail, and one additional app.
 5. Open a field and verify listening starts automatically. Select Structured, dictate a sentence
    containing filler, an unrelated comment, and a deliberate foreign term; verify speaking style is
-   preserved, noise is removed, and the foreign term is not transliterated.
+   preserved, noise is removed, and the foreign term is not transliterated. While listening, verify
+   the microphone has a gentle ripple in silence and visibly stronger waves while speaking.
 6. In the gear popup select English and dictate Ukrainian, then select Ukrainian and dictate
    English. Verify each complete result uses the selected language and the selection survives IME
    recreation. Exercise Undo and Regenerate.
@@ -60,8 +61,11 @@ allowlist and specification before changing the local model value.
 14. Capture three cloud timings (first call and two warm calls) without transcript content:
 
     ```sh
-    adb logcat -s Bubnilka | grep 'timing=gemini_generate'
+    adb logcat -s Bubnilka | grep -E 'timing=gemini_generate_(first|repeat)_process'
     ```
+
+    `first_process` is the first Gemini request since the app process started; later requests are
+    `repeat_process`. Restart the app process before another cold sample.
 
 15. Record observed latency, recognition accuracy, and app-specific limitations in the project
    feedback notes before claiming device verification.

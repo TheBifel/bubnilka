@@ -32,4 +32,13 @@ class SpeechRecognitionModeTest {
         assertEquals(true, supportsAutomaticLanguageDetection(sdkInt = 34))
         assertEquals(true, supportsAutomaticLanguageDetection(sdkInt = 36))
     }
+
+    @Test
+    fun normalizesRecognizerRmsIntoStableVisualRange() {
+        assertEquals(0f, normalizeRmsDb(Float.NaN), 0.001f)
+        assertEquals(0f, normalizeRmsDb(-2f), 0.001f)
+        assertEquals(0.5f, normalizeRmsDb(4f), 0.001f)
+        assertEquals(1f, normalizeRmsDb(10f), 0.001f)
+        assertEquals(1f, normalizeRmsDb(30f), 0.001f)
+    }
 }
