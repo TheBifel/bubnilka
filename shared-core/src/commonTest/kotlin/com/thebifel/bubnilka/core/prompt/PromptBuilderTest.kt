@@ -83,4 +83,16 @@ class PromptBuilderTest {
         assertContains(prompt, "пробіли")
         assertContains(prompt, "залиши наявний текст без змін")
     }
+
+    @Test
+    fun injectsEditableCustomPresetInstruction() {
+        val prompt = PromptBuilder.build(
+            request.copy(
+                styleId = "custom-test",
+                styleInstruction = "Пиши як сценарій короткого науково-фантастичного фільму.",
+            ),
+        )
+
+        assertContains(prompt, "Стиль: Пиши як сценарій короткого науково-фантастичного фільму.")
+    }
 }

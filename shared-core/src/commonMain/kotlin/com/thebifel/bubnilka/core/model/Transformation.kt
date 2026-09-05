@@ -8,6 +8,7 @@ data class TransformationRequest(
     val sessionId: Long,
     val rawTranscript: String,
     val styleId: String,
+    val styleInstruction: String = StylePreset.fromId(styleId)?.instruction.orEmpty(),
     val sourceLanguageTag: String = AUTO_DETECT_LANGUAGE_TAG,
     val targetLanguageTag: String = LanguageMode.default.targetLanguageTag,
     val existingFieldText: String? = null,
@@ -17,7 +18,8 @@ data class TransformationRequest(
         require(rawTranscript.isNotBlank())
         require(rawTranscript.length <= MAX_TRANSCRIPT_LENGTH)
         require(rawTranscript == rawTranscript.trim())
-        require(StylePreset.fromId(styleId) != null)
+        require(styleId.isNotBlank() && styleId.length <= MAX_STYLE_ID_LENGTH)
+        require(styleInstruction.isNotBlank() && styleInstruction.length <= MAX_STYLE_INSTRUCTION_LENGTH)
         require(sourceLanguageTag == AUTO_DETECT_LANGUAGE_TAG || LanguageMode.supports(sourceLanguageTag))
         require(LanguageMode.supports(targetLanguageTag))
         require(existingFieldText == null || existingFieldText.length <= MAX_FIELD_CONTEXT_LENGTH)
@@ -31,7 +33,7 @@ data class TransformationResult(
 ) {
     fun normalizedTextOrNull(): String? {
         val normalized = text.trim()
-        if (sessionId <= 0 || StylePreset.fromId(styleId) == null) return null
+        if (sessionId <= 0 || styleId.isBlank() || styleId.length > MAX_STYLE_ID_LENGTH) return null
         if (normalized.isEmpty() || normalized.length > MAX_TRANSFORMED_LENGTH) return null
         if (ASSISTANT_PREAMBLES.any { normalized.startsWith(it, ignoreCase = true) }) return null
         return normalized

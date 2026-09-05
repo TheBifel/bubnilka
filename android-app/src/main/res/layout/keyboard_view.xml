@@ -20,37 +20,11 @@
         android:scrollbars="none">
 
         <LinearLayout
+            android:id="@+id/style_preset_container"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            tools:ignore="ButtonStyle">
-
-            <Button
-                android:id="@+id/style_structured_button"
-                style="@style/BubnilkaStyleChip"
-                android:text="@string/style_structured" />
-
-            <Button
-                android:id="@+id/style_concise_button"
-                style="@style/BubnilkaStyleChip"
-                android:text="@string/style_concise" />
-
-            <Button
-                android:id="@+id/style_professional_button"
-                style="@style/BubnilkaStyleChip"
-                android:text="@string/style_professional" />
-
-            <Button
-                android:id="@+id/style_friendly_button"
-                style="@style/BubnilkaStyleChip"
-                android:text="@string/style_friendly" />
-
-            <Button
-                android:id="@+id/style_viking_button"
-                style="@style/BubnilkaStyleChip"
-                android:layout_marginEnd="0dp"
-                android:text="@string/style_viking" />
-        </LinearLayout>
+            tools:ignore="ButtonStyle" />
     </HorizontalScrollView>
 
     <TextView

@@ -12,6 +12,18 @@ import kotlin.test.assertTrue
 
 class KeyboardSessionTest {
     @Test
+    fun customPresetInstructionIsCapturedInTransformationRequest() {
+        val custom = StylePreset("custom-test", "Мій стиль", "Зберігай короткі рубані речення.")
+        val session = KeyboardSession(initialStyle = custom)
+        val sessionId = session.startListening()
+
+        val request = session.onFinalTranscript(sessionId, "Тестовий текст")
+
+        assertEquals(custom.id, request?.styleId)
+        assertEquals(custom.instruction, request?.styleInstruction)
+    }
+
+    @Test
     fun startsIdleWithStructuredStyle() {
         val session = KeyboardSession()
 

@@ -285,6 +285,20 @@ field and confirm no voice or cloud action can begin.
 
 ---
 
+## Phase 16: Editable Prompt Presets
+
+- [X] T079 Replace enum-only styles with validated editable shared models and capture the current
+  instruction in transformation requests.
+- [X] T080 Seed factory presets into tested local storage with edit, add, delete, ordering, and
+  selected-preset persistence.
+- [X] T081 Add the keyboard edit affordance, preset list, add/edit form, save validation, and delete
+  confirmation with system-theme resources.
+- [X] T082 Raise disclosure version for locally persisted and cloud-submitted custom prompts.
+- [X] T083 Run full verification, exercise edit/add/delete and keyboard refresh on emulator,
+  publish APK, commit, and push.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bubnilka_background"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp">
+
+        <ImageButton
+            android:id="@+id/preset_edit_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/utility_button"
+            android:contentDescription="@string/back"
+            android:padding="12dp"
+            android:src="@drawable/ic_arrow_back" />
+
+        <TextView
+            android:id="@+id/preset_edit_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:text="@string/preset_edit_title"
+            android:textColor="@color/bubnilka_text"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/preset_save"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/utility_button"
+            android:contentDescription="@string/save_preset"
+            android:padding="12dp"
+            android:src="@drawable/ic_check" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/preset_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/transcript_panel"
+        android:hint="@string/preset_name_hint"
+        android:inputType="textCapSentences"
+        android:maxLength="60"
+        android:minHeight="56dp"
+        android:padding="12dp"
+        android:textColor="@color/bubnilka_text"
+        android:textColorHint="@color/bubnilka_muted" />
+
+    <EditText
+        android:id="@+id/preset_prompt"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        android:layout_weight="1"
+        android:background="@drawable/transcript_panel"
+        android:gravity="top|start"
+        android:hint="@string/preset_prompt_hint"
+        android:inputType="textCapSentences|textMultiLine"
+        android:maxLength="4000"
+        android:padding="12dp"
+        android:scrollbars="vertical"
+        android:textColor="@color/bubnilka_text"
+        android:textColorHint="@color/bubnilka_muted" />
+</LinearLayout>

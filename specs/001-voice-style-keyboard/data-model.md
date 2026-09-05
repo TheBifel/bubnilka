@@ -3,11 +3,14 @@
 ## StylePreset
 
 - `id`: stable machine identifier
-- `title`: user-visible Ukrainian label
-- `instruction`: transformation intent used by prompt construction
-- `isDefault`: exactly one preset is the default
+- `title`: editable user-visible label, 1..60 characters
+- `instruction`: editable transformation intent, 1..4,000 characters
+- `isDefault`: seed metadata retained when a factory preset is edited
 
-Validation: IDs are unique; title and instruction are nonblank; Structured is the sole default.
+Validation: IDs are unique and nonblank; title and instruction are trimmed and nonblank. The five
+factory values seed Android local storage only when no stored list exists. Their IDs are retained on
+edit; new presets receive generated IDs. Order and selected ID persist locally, and deletion may not
+leave the collection empty.
 
 ## DictationSession
 
@@ -52,6 +55,7 @@ the listening visualization, never persisted, and does not trigger a full `Keybo
 - `sessionId`
 - `rawTranscript`: 1..2,000 trimmed characters
 - `styleId`
+- `styleInstruction`: immutable snapshot of the selected editable prompt for this request
 - `sourceLanguageTag`: `auto` for normal sessions; an explicit supported tag remains valid for
   provider-level tests and compatibility
 - `targetLanguageTag`: `uk-UA` or `en-US`

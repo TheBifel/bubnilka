@@ -22,8 +22,8 @@ provider contracts. Android-only adapters own speech recognition, Firebase, pref
 `com.android.kotlin.multiplatform.library`, Kotlin coroutines, Firebase Android BoM 34.18.0,
 Firebase AI Logic 17.16.0, Firebase App Check 19.4.1, AndroidX Core/Activity/Lifecycle
 
-**Storage**: Android preferences for consent, selected output language, and whole-field mode only;
-transcripts and insertion records remain in memory
+**Storage**: Android preferences for consent, selected output language, whole-field mode, and the
+ordered editable preset collection; transcripts and insertion records remain in memory
 
 **Testing**: Kotlin `commonTest`, Android host/JVM unit tests, Android Lint, fake provider/connection
 contract tests, manual Samsung Galaxy S21 smoke test
@@ -39,8 +39,9 @@ cloud result committed within 10 seconds after recognition in 9/10 normal-networ
 no content logging; no iOS build; no full alphabet layout; clean build must not require private
 credentials
 
-**Scale/Scope**: One private tester, five style presets, one active session, messages up to 2,000
-characters with an MVP UX optimized for typical messages up to 500 characters
+**Scale/Scope**: One private tester, five factory presets plus user-created presets, one active
+session, messages up to 2,000 characters with an MVP UX optimized for typical messages up to 500
+characters
 
 ## Constitution Check
 

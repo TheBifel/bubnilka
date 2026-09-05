@@ -1,6 +1,7 @@
 package com.thebifel.bubnilka.ime
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.inputmethodservice.InputMethodService
 import android.view.ContextThemeWrapper
 import android.view.MotionEvent
@@ -9,6 +10,8 @@ import android.view.ViewConfiguration
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.ScrollView
 import android.widget.TextView
@@ -18,14 +21,15 @@ import com.thebifel.bubnilka.core.model.KeyboardFailure
 import com.thebifel.bubnilka.core.model.KeyboardState
 import com.thebifel.bubnilka.core.model.LanguageMode
 import com.thebifel.bubnilka.core.model.RecoveryAction
-import com.thebifel.bubnilka.core.model.StylePreset
 import com.thebifel.bubnilka.core.session.KeyboardSession
 import com.thebifel.bubnilka.core.session.VoiceFlow
 import com.thebifel.bubnilka.debug.UiInspector
+import com.thebifel.bubnilka.presets.PresetListActivity
 import com.thebifel.bubnilka.runtime.BubnilkaLog
 import com.thebifel.bubnilka.runtime.CoroutineOwner
 import com.thebifel.bubnilka.speech.AndroidSpeechToTextProvider
 import com.thebifel.bubnilka.storage.ConsentRepository
+import com.thebifel.bubnilka.storage.StylePresetRepository
 
 class BubnilkaInputMethodService : InputMethodService() {
     private val coroutineOwner = CoroutineOwner()
@@ -35,6 +39,8 @@ class BubnilkaInputMethodService : InputMethodService() {
     private var insertionPort: AndroidTextInsertionPort? = null
     private var keyboardView: View? = null
     private val consentRepository: ConsentRepository by lazy { ConsentRepository.from(this) }
+    private val stylePresetRepository: StylePresetRepository by lazy { StylePresetRepository.from(this) }
+    private val styleButtons = mutableMapOf<String, Button>()
     private var cloudConsentAccepted: Boolean = false
     private var includeFieldContext: Boolean = true
     private var previewAutoFollow: Boolean = true
@@ -73,11 +79,7 @@ class BubnilkaInputMethodService : InputMethodService() {
             onAudioLevelChanged = { level -> view.post { renderAudioLevel(level) } },
         )
 
-        bindStyle(view, R.id.style_structured_button, StylePreset.STRUCTURED)
-        bindStyle(view, R.id.style_concise_button, StylePreset.CONCISE)
-        bindStyle(view, R.id.style_professional_button, StylePreset.PROFESSIONAL)
-        bindStyle(view, R.id.style_friendly_button, StylePreset.FRIENDLY)
-        bindStyle(view, R.id.style_viking_button, StylePreset.VIKING)
+        bindStyles(view)
         session.selectLanguageMode(loadLanguageMode())
         includeFieldContext = loadFieldContextPreference()
         configurePreviewScrolling(view.findViewById(R.id.transcript_scroll))
@@ -135,6 +137,7 @@ class BubnilkaInputMethodService : InputMethodService() {
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
         cloudConsentAccepted = consentRepository.isAccepted()
+        bindStyles(keyboardView ?: return)
         applyEditorPolicy(info)
         render(session.state)
         keyboardView?.post(::startListeningWhenReady)
@@ -188,11 +191,42 @@ class BubnilkaInputMethodService : InputMethodService() {
         else -> 55L
     }
 
-    private fun bindStyle(view: View, buttonId: Int, style: StylePreset) {
-        view.findViewById<Button>(buttonId).setOnClickListener {
-            session.selectStyle(style)
-            render(session.state)
+    private fun bindStyles(view: View) {
+        val presets = stylePresetRepository.load()
+        val selected = stylePresetRepository.selected(presets)
+        session.selectStyle(selected)
+        val container = view.findViewById<LinearLayout>(R.id.style_preset_container)
+        container.removeAllViews()
+        styleButtons.clear()
+        presets.forEach { style ->
+            val button = Button(this, null, 0, R.style.BubnilkaStyleChip).apply {
+                text = style.title
+                contentDescription = style.title
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    dp(40),
+                ).apply {
+                    marginEnd = dp(6)
+                }
+                setOnClickListener {
+                    stylePresetRepository.select(style.id)
+                    session.selectStyle(style)
+                    render(session.state)
+                }
+            }
+            styleButtons[style.id] = button
+            container.addView(button)
         }
+        container.addView(
+            ImageButton(this).apply {
+                setImageResource(R.drawable.ic_edit)
+                setBackgroundResource(R.drawable.utility_button)
+                contentDescription = getString(R.string.edit_presets)
+                setPadding(dp(10), dp(10), dp(10), dp(10))
+                setOnClickListener { openPresetEditor() }
+                layoutParams = LinearLayout.LayoutParams(dp(40), dp(40))
+            },
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -292,11 +326,7 @@ class BubnilkaInputMethodService : InputMethodService() {
             is KeyboardState.Failure -> state.selectedStyle
             KeyboardState.SensitiveField -> session.selectedStyle
         }
-        renderStyle(view, R.id.style_structured_button, selectedStyle == StylePreset.STRUCTURED)
-        renderStyle(view, R.id.style_concise_button, selectedStyle == StylePreset.CONCISE)
-        renderStyle(view, R.id.style_professional_button, selectedStyle == StylePreset.PROFESSIONAL)
-        renderStyle(view, R.id.style_friendly_button, selectedStyle == StylePreset.FRIENDLY)
-        renderStyle(view, R.id.style_viking_button, selectedStyle == StylePreset.VIKING)
+        styleButtons.forEach { (id, button) -> button.isSelected = id == selectedStyle.id }
 
         transcriptScroll.post {
             if (previewAutoFollow && !previewUserInteracting) {
@@ -334,17 +364,19 @@ class BubnilkaInputMethodService : InputMethodService() {
         }
     }
 
-    private fun renderStyle(view: View, buttonId: Int, selected: Boolean) {
-        renderSelection(view, buttonId, selected)
-    }
-
     private fun renderAudioLevel(level: Float) {
         keyboardView?.findViewById<VoiceRippleView>(R.id.microphone_ripple)?.setAudioLevel(level)
     }
 
-    private fun renderSelection(view: View, buttonId: Int, selected: Boolean) {
-        view.findViewById<Button>(buttonId).isSelected = selected
+    private fun openPresetEditor() {
+        if (session.state is KeyboardState.Listening) voiceFlow?.cancel()
+        requestHideSelf(0)
+        startActivity(
+            Intent(this, PresetListActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
     }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     private fun startListeningWhenReady() {
         if (!cloudConsentAccepted || session.state is KeyboardState.SensitiveField) return

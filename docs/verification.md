@@ -214,3 +214,32 @@ Final APK for this pass:
 - Size: 16 083 939 bytes.
 - SHA-256: `13e7a994da9278a71040ce6937994a54159a1a53b33dcbea6330f01b951ba00d`.
 - Published: `/tank/files/bubnilka-0.1.0-debug.apk`.
+
+## Editable style presets — 2026-09-05 UTC
+
+Factory style presets are now seeded into local storage on first use and behave like ordinary
+editable presets afterward. The pencil at the end of the keyboard strip opens the ordered preset
+list; each row supports edit and confirmed delete, while the final `+` opens the same editor in
+create mode. The editor validates a short name and a non-empty prompt, and the keyboard reloads the
+persisted list and selection whenever it becomes visible. Deleting the selected preset selects the
+first remaining item; deleting the final preset is intentionally blocked.
+
+Full verification succeeded:
+
+- 36 KMP/JVM tests passed, including injection and capture of an editable custom instruction;
+- 28 Android unit tests passed, including initial factory seeding, edit/add ordering, selected-item
+  fallback, and last-item protection;
+- Android Lint completed successfully;
+- debug APK, `compileReleaseKotlin`, and release manifest processing succeeded;
+- the final APK was installed successfully on the Android 15 emulator.
+
+Emulator interaction covered editing and persisting the Structured preset, adding a custom preset,
+confirmed deletion, and returning to the IME to observe the refreshed chip label. Accessibility-tree
+bounds also confirmed the list rows, trailing `+`, editor fields, top-right save action, and corrected
+Android 15 status-bar inset.
+
+Final APK for this pass:
+
+- Size: 16 084 518 bytes.
+- SHA-256: `cf0e3a8092d55d092bb370edcd96bc2f6ecbd562c0091afff13eaec839416490`.
+- Published: `/tank/files/bubnilka-0.1.0-debug.apk`.

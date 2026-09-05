@@ -10,6 +10,7 @@ without adding facts or assistant commentary. By default, merge it with supplied
 - Current session identifier
 - Trimmed final transcript, 1..2,000 characters
 - Known style identifier
+- Current editable style instruction captured when the dictation becomes final
 - Auto-detect source marker and selected Ukrainian or English target language tag
 - Complete field snapshot by default (maximum 6,000 characters) and additional transcript as
   separate untrusted data blocks; the user can disable field combination

@@ -220,10 +220,21 @@ it to transform and insert only the new dictation at the cursor.
 - **FR-033**: When listening first starts in an application process, the cloud provider MUST begin
   one content-free warm-up generation immediately; the first dictated transformation MUST wait for
   that attempt to finish and MUST proceed normally if warm-up fails.
+- **FR-034**: The style strip MUST end with an edit icon that opens a dedicated preset list; the
+  list MUST show every preset with edit and delete actions and a final add item.
+- **FR-035**: Add and edit MUST open a dedicated form with a name field, a remaining-height prompt
+  field, and a top-right save checkmark; both trimmed fields are required.
+- **FR-036**: The five built-in presets MUST seed local storage only once and thereafter behave like
+  editable, deletable user data. At least one preset MUST remain available.
+- **FR-037**: Every transformation and regeneration MUST capture the selected preset's current
+  instruction in its request rather than reconstructing the instruction from a factory ID.
+- **FR-038**: Preset names, instructions, order, and selected ID MUST persist locally. Disclosure
+  MUST state that the selected instruction is sent to Gemini with the transformed content.
 
 ### Key Entities
 
-- **Style preset**: A stable style identifier, user-facing title, and transformation intent.
+- **Style preset**: A stable identifier, editable user-facing title, editable transformation
+  instruction, and local ordering. Factory presets are initial values rather than immutable types.
 - **Language mode**: Persistent Ukrainian or English output target and recognition fallback locale.
 - **Dictation session**: The active session identity, selected style, partial/final transcript,
   lifecycle state, and recoverable failure if any.

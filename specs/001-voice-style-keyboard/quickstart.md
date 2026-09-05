@@ -33,8 +33,8 @@ allowlist and specification before changing the local model value.
 ## Device smoke test
 
 1. Install `android-app/build/outputs/apk/debug/android-app-debug.apk`.
-2. Open Bubnilka and accept disclosure version 4 covering automatic listening, system-recognizer
-   fallback, Gemini processing/translation, and default whole-field context. Earlier acceptance
+2. Open Bubnilka and accept disclosure version 5 covering automatic listening, system-recognizer
+   fallback, Gemini processing/translation, editable preset prompts, and default whole-field context. Earlier acceptance
    is intentionally invalidated.
 3. Use the provided system buttons to enable and select Bubnilka.
 4. Focus a normal text field in Notes, Telegram, a browser, Gmail, and one additional app.
@@ -58,7 +58,11 @@ allowlist and specification before changing the local model value.
    repeats, accelerates, and stops immediately on release without opening another keyboard.
 13. Switch Android between light and dark system themes and verify the app, keyboard, and language
     popup follow without an in-app theme toggle.
-14. Capture three cloud timings (first call and two warm calls) without transcript content:
+14. Open the pencil at the end of the style strip. Edit a factory preset's name and prompt, save it,
+    and verify the renamed chip appears in the keyboard and its instruction reaches the next request.
+    Add a new preset with `+`, delete it from the list, and verify the last remaining preset cannot
+    be deleted.
+15. Capture three cloud timings (first call and two warm calls) without transcript content:
 
     ```sh
     adb logcat -s Bubnilka | grep -E 'timing=(gemini_warmup|gemini_generate_(first|repeat)_user_process)'
@@ -68,7 +72,7 @@ allowlist and specification before changing the local model value.
     transformation after it; later dictated requests are `repeat_user_process`. Restart the app
     process before another cold sample. The warm-up consumes one additional free-tier request.
 
-15. Record observed latency, recognition accuracy, and app-specific limitations in the project
+16. Record observed latency, recognition accuracy, and app-specific limitations in the project
    feedback notes before claiming device verification.
 
 If Ukrainian on-device recognition is missing, the first dictation should use the system recognizer.

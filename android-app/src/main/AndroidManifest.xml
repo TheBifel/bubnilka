@@ -29,6 +29,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".presets.PresetListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presets.PresetEditActivity"
+            android:exported="false" />
 
         <service
             android:name=".ime.BubnilkaInputMethodService"
