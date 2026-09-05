@@ -46,6 +46,7 @@ class BubnilkaInputMethodService : InputMethodService() {
     private var previewAutoFollow: Boolean = true
     private var previewUserInteracting: Boolean = false
     private var previewSessionId: Long? = null
+    private var inputViewVisible: Boolean = false
     private var backspaceRepeatView: View? = null
     private var backspaceRepeatCount: Int = 0
     private val backspaceRepeatAction = object : Runnable {
@@ -127,6 +128,7 @@ class BubnilkaInputMethodService : InputMethodService() {
     }
 
     override fun onFinishInput() {
+        inputViewVisible = false
         stopBackspaceRepeat()
         speechProvider?.close()
         session.reset()
@@ -136,11 +138,20 @@ class BubnilkaInputMethodService : InputMethodService() {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        inputViewVisible = true
         cloudConsentAccepted = consentRepository.isAccepted()
         bindStyles(keyboardView ?: return)
         applyEditorPolicy(info)
         render(session.state)
         keyboardView?.post(::startListeningWhenReady)
+    }
+
+    override fun onFinishInputView(finishingInput: Boolean) {
+        inputViewVisible = false
+        stopBackspaceRepeat()
+        if (session.state is KeyboardState.Listening) voiceFlow?.cancel()
+        renderAudioLevel(0f)
+        super.onFinishInputView(finishingInput)
     }
 
     override fun onDestroy() {
@@ -379,6 +390,7 @@ class BubnilkaInputMethodService : InputMethodService() {
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     private fun startListeningWhenReady() {
+        if (!inputViewVisible) return
         if (!cloudConsentAccepted || session.state is KeyboardState.SensitiveField) return
         if (session.state is KeyboardState.Listening || session.state is KeyboardState.Transforming) return
         voiceFlow?.start(includeFieldContext = includeFieldContext)

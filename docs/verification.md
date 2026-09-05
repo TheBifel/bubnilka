@@ -243,3 +243,22 @@ Final APK for this pass:
 - Size: 16 084 518 bytes.
 - SHA-256: `cf0e3a8092d55d092bb370edcd96bc2f6ecbd562c0091afff13eaec839416490`.
 - Published: `/tank/files/bubnilka-0.1.0-debug.apk`.
+
+## Microphone visibility lifecycle — 2026-09-05 UTC
+
+The IME now marks its input view visible before scheduling automatic listening and marks it hidden
+before cancelling active recognition from `onFinishInputView`. The visibility guard prevents an
+already queued automatic-start callback from reopening the microphone after collapse. The same
+callback also stops Backspace repetition and resets the live audio level.
+
+The full verification pipeline, release Kotlin compilation, and release manifest processing
+succeeded. On the Android 15 emulator, AppOps reported `RECORD_AUDIO ... (running)` while the IME
+was visible. One second after collapsing it with Back, AppOps showed a completed 11.846-second
+recording; after another three seconds the duration remained unchanged, proving recognition did not
+restart while the input view stayed hidden.
+
+Final APK for this pass:
+
+- Size: 16 084 449 bytes.
+- SHA-256: `6d7fd0013eb54b91683c6ba93adcd2d9fe0fb6adee33a4744aaa4179c54941b5`.
+- Published: `/tank/files/bubnilka-0.1.0-debug.apk`.

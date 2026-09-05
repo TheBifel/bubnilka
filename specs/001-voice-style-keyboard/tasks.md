@@ -297,6 +297,13 @@ field and confirm no voice or cloud action can begin.
 - [X] T083 Run full verification, exercise edit/add/delete and keyboard refresh on emulator,
   publish APK, commit, and push.
 
+## Phase 17: Microphone visibility lifecycle
+
+- [X] T084 Cancel active recognition from `onFinishInputView`, reset the live audio indicator, and
+  guard queued automatic start callbacks while the IME is hidden.
+- [X] T085 Verify collapse behavior on the Android emulator, run the full gate, publish APK, commit,
+  and push.
+
 ---
 
 ## Dependencies & Execution Order

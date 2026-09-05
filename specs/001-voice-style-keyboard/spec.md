@@ -230,6 +230,9 @@ it to transform and insert only the new dictation at the cursor.
   instruction in its request rather than reconstructing the instruction from a factory ID.
 - **FR-038**: Preset names, instructions, order, and selected ID MUST persist locally. Disclosure
   MUST state that the selected instruction is sent to Gemini with the transformed content.
+- **FR-039**: When the IME input view stops being visible, active speech recognition MUST be
+  cancelled immediately and any queued automatic-listening callback MUST NOT restart it while the
+  keyboard remains hidden.
 
 ### Key Entities
 
